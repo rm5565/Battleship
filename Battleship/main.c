@@ -7,244 +7,197 @@
 char p1_game_board[10][10];
 char p2_game_board[10][10];
 
+int game_over = 0;  // 0 = game is still going,  1 = game over!  global var
+int CTRL_C = 0;
+int strategy_test_mode = 0;
+int pause_between_shots_mode = 0;
+int write_to_log_file = 0;
 
+// Play a round 
+// return 1 if game over
+int play_a_round(struct player_data* shooting_player, struct player_data* target_player, FILE *log_file, int round) {
+	int target_row = 0, target_col = 0;
+	int game_over = 0;
+
+	int firing_result;
+	int target_ship_type = 0;
+
+
+	getTargetRecommendation(shooting_player, &target_row, &target_col, round);
+
+
+	if (strategy_test_mode == 0) {
+		fprintf(log_file, "---------------------------------------------------------------------------------------------------------------\n");
+		printf("%sRound %d\n", ERASE_TO_EOL, round);
+		fprintf(log_file, "Round %d\n", round);
+		display_target_queue(shooting_player);
+		if (write_to_log_file) output_target_queue(log_file, shooting_player);
+		printf("%sRecommended target is %d %d\n", ERASE_TO_EOL, target_row, target_col);
+		fprintf(log_file, "Recommended target is %d %d\n", target_row, target_col);
+	}
+
+
+
+	firing_result = fireAtTarget(shooting_player, target_player, target_row, target_col, &target_ship_type);
+
+	updatePlayers(shooting_player, target_player, firing_result, target_row, target_col, target_ship_type);
+
+	if (strategy_test_mode == 0) {
+		printf("%sResult of firing at %d %d was ", ERASE_TO_EOL, target_row, target_col);
+		fprintf(log_file, "Result of firing at %d %d was ", target_row, target_col);
+	}
+
+	if (firing_result == 0) {
+		if (strategy_test_mode == 0) {
+			printf("MISS\n");
+			fprintf(log_file, "MISS\n");
+		}
+	}
+	else {
+
+		int ship_sunk = check_if_sunk_ship(target_player, ship_to_char(target_ship_type));
+		if (ship_sunk == 0) {
+			if (strategy_test_mode == 0) {
+				printf("%sHIT on a %s\n", ERASE_TO_EOL, ship_type_to_ship_name(target_ship_type));   // remove ship_type_to_ship_name to hide info from user
+				fprintf(log_file, "HIT on a %s\n", ship_type_to_ship_name(target_ship_type)); // normally user doesn't know type until ship is sunk
+			}
+
+		}
+		else if (ship_sunk == 1) {
+			updateTargetingQueue(shooting_player, target_ship_type);	// when a ship is sunk, update the target queue to remove nearby future targets
+			if (strategy_test_mode == 0) {
+				printf("%sHIT and SUNK !!!  %s lost a %s\n", ERASE_TO_EOL, target_player->name, ship_type_to_ship_name(target_ship_type));
+				fprintf(log_file, "HIT and SUNK !!!% s lost a % s\n", target_player->name, ship_type_to_ship_name(target_ship_type));
+			}
+			if (check_if_all_ships_sunk(target_player) == 1) {
+				game_over = 1;
+			}
+		}
+	}
+
+	if (strategy_test_mode == 0) {
+		display_boards(shooting_player, target_player, 0);
+		printf("\n");
+		display_target_queue(shooting_player);
+		printf("\n--------------------------------------------------\n");
+		if (write_to_log_file) {
+			output_strategy(log_file, shooting_player);
+			output_boards(log_file, target_player, shooting_player);
+			output_target_queue(log_file, shooting_player);
+		}
+	}
+	
+
+	return(game_over);
+
+}
 
 
 int main(void) {
 	
 	struct player_data player_1;
 	struct player_data player_2;
-	FILE* log_file;
+	FILE* log_file = NULL, * csv_file = NULL;
 
-	srand(time(0));
-
-	initialize_player(&player_1, "Richard");
-	initialize_player(&player_2, "Computer");
-	debug_place_ships_on_board(&player_1);  
-	debug_place_ships_on_board(&player_2);
-
-	//init_strategy3(&player_2);
+	srand((unsigned int) time(0));
 
 
-	// Open the log file
-	fopen_s(&log_file, "battleship.log", "w");
-
-	int game_over = 0;  // 0 = game is still going,  1 = game over!
-	int target_row = 0, target_col = 0;
-	char answer;
-
-	while (game_over == 0) {
-		
-		int firing_result;
-		int ship_type = 0;
-
-		getTargetRecommendation(&player_2,&target_row, &target_col);
-		printf("Recommended target is %d %d\n", target_row, target_col);
-
-		
-		firing_result = fireAtTarget(&player_2, &player_1, target_row, target_col, &ship_type);
-		printf("Result of firing at %d %d was ", target_row, target_col);
-		if (firing_result == 0) printf("MISS\n"); else printf("HIT on a %s\n", ship_type_to_ship_name(ship_type));
-
-		updatePlayers(&player_2, &player_1, firing_result, target_row, target_col, ship_type);
-		
-
-		display_boards(&player_2, &player_1, 0);
-		printf("\n");
-
-		output_strategy(log_file, &player_2);
-		output_boards(log_file, &player_1, &player_2);
-
-		printf("Exit game ?\n(Enter '1' for yes, '2' or just 'Enter' for no): ");
-		scanf_s("%c", &answer, 1);
-		if (answer == '1') game_over = 1;
-		if (game_over == 0) system("cls");
+	if (write_to_log_file) {
+		fopen_s(&log_file, "battleship.log", "w");						// Open the log file	
+		errno_t result = fopen_s(&csv_file, "battleship.csv", "a+");	// Open the cvs file
 	}
 
+	// Set the CTRL-C handler so we can exit nicely
+	SetConsoleCtrlHandler(CtrlHandler, TRUE);
 
-	fclose(log_file);
+	int tournament_ties = 0;
+	int tournament_p1_wins = 0;
+	int tournament_p2_wins = 0;
+	int GAMES = 0;
+
+
+	if (strategy_test_mode == 0) system("cls");
+	if (strategy_test_mode == 0) printf("%s", HIDE_CURSOR); else printf(SAVE_CURSOR_POSN);
+
+	for (GAMES = 0; (GAMES < 1000000) && (CTRL_C==0); GAMES++) {
+
+		if (strategy_test_mode == 0) printf("%s%s%s", BG_black, HOME_CURSOR, ERASE_DISPLAY);
+		else {
+			if ((GAMES>0) && (GAMES % 1000 == 0)) {
+				double p1winpercentage = (double)tournament_p1_wins / (tournament_p1_wins + tournament_p2_wins + tournament_ties) * 100;
+				double p2winpercentage = (double)tournament_p2_wins / (tournament_p1_wins + tournament_p2_wins + tournament_ties) * 100;
+				double tiepercentage = (double)tournament_ties / (tournament_p1_wins + tournament_p2_wins + tournament_ties) * 100;
+				printf("%sGAMES: %d   %s wins:%d %2.0f%%    %s wins:%d %2.0f%%  ties:%d %2.0f%%   total:%d\n", RESTORE_CURSOR_POSN, GAMES, player_1.name, tournament_p1_wins, p1winpercentage, player_2.name, tournament_p2_wins, p2winpercentage, tournament_ties, tiepercentage, (tournament_p1_wins + tournament_p2_wins + tournament_ties));
+			}
+		}
+
+		initialize_player(&player_1, "Strategy 3", 3);  // 
+		initialize_player(&player_2, "Strategy 4", 4);  //
+		// debug_place_ships_on_board(&player_1);  			add_new_hit_to_queue(&player_2, 5, 1, UnknownShip);
+		// debug_place_ships_on_board(&player_2);			add_new_hit_to_queue(&player_1, 5, 1, UnknownShip);
+		randomly_place_ships_on_board(&player_1);
+		randomly_place_ships_on_board(&player_2);
+
+
+		game_over = 0;
+
+
+		int round = 1; // game round
+		int p1_wins = 0, p2_wins = 0;
+
+		while ((game_over == 0) && (round < 100)) {
+
+			if (strategy_test_mode == 0) printf("GAME: %d   %s wins:%d    %s wins:%d   ties:%d\n", GAMES, player_1.name, tournament_p1_wins, player_2.name, tournament_p2_wins, tournament_ties);
+
+
+			p1_wins = play_a_round(&player_1, &player_2, log_file, round);
+
+			p2_wins = play_a_round(&player_2, &player_1, log_file, round);
+
+			
+			if (strategy_test_mode == 0) {
+				if (pause_between_shots_mode == 1) {
+					if (game_over != 1) {
+						char answer;
+						printf("%sExit game ?  (Enter '1' for yes, '2' or just 'Enter' for no): ", LINE25_CURSOR);
+						scanf_s("%c", &answer, 1);
+						if (answer == '1') game_over = 1;
+					}
+				}
+			}
+			
+			
+
+			if ((p1_wins == 1) || (p2_wins == 1)) game_over = 1;
+			round++;
+			if ((game_over == 0) && (round < 100) && (strategy_test_mode == 0))
+				  printf("%s%s", BG_black , HOME_CURSOR); // system("cls");//ESC [ <y> ; <x> H  //"\x1b[0G\x1[0d"
+		}
+
+		if ((p1_wins == 1) && (p2_wins == 1)) {
+			tournament_ties++;
+		}
+		else if (p1_wins == 1) tournament_p1_wins++;
+		else tournament_p2_wins++;
+
+		
+		//display_stats(&player_1, &player_2, round);
+		if (write_to_log_file) {
+			output_CSV(csv_file, &player_1, &player_2, round);
+			output_stats(log_file, &player_1, &player_2, round);
+		}
+
+	}
+
+	printf("%s", SHOW_CURSOR);
+
+	double p1winpercentage = (double)tournament_p1_wins / (tournament_p1_wins + tournament_p2_wins + tournament_ties) * 100;
+	double p2winpercentage = (double)tournament_p2_wins / (tournament_p1_wins + tournament_p2_wins + tournament_ties) * 100;
+	double tiepercentage = (double)tournament_ties / (tournament_p1_wins + tournament_p2_wins + tournament_ties) * 100;
+	printf("\nGAMES: %d   %s wins:%d %2.0f%%    %s wins:%d %2.0f%%  ties:%d %2.0f%%   total:%d\n", GAMES, player_1.name, tournament_p1_wins, p1winpercentage, player_2.name, tournament_p2_wins, p2winpercentage, tournament_ties, tiepercentage, (tournament_p1_wins + tournament_p2_wins + tournament_ties));
+
+	if (write_to_log_file) _fcloseall();
 }
 
 
 
-
-/*
-* 
-int OLDmain(void) {
-
-
-
-	char answer;
-	char str[10];
-	char ship_type_hit;
-	FILE* log_file;
-
-	struct player_data player_1;
-	struct player_data player_2;
-
-	srand(time(0));
-
-	initialize_game_board(&player_1, "Richard");
-	initialize_game_board(&player_2, "Computer");
-
-	//welcome_screen();
-
-	printf("%s, do you want to setup your pieces (1) manually or (2) random or (3) debug [default] ?", player_1.name);
-	scanf_s("%c", &answer, 1);
-	if (answer == '1') { manually_place_ships_on_board(&player_1); randomly_place_ships_on_board(&player_2); }
-	if (answer == '2') { randomly_place_ships_on_board(&player_1); randomly_place_ships_on_board(&player_2); }
-	else { debug_place_ships_on_board(&player_1);  debug_place_ships_on_board(&player_2); }
-
-	int current_player;
-	if ((answer == '1') || (answer == '2')) {
-		current_player = select_who_starts_first();  // returns '1' or '2'
-		if (current_player == 1) printf("\n\n%s has been randomly selected to go first.\n\n", player_1.name);
-		else printf("\n\n%s has been randomly selected to go first.\n\n", player_2.name);
-	}
-	else current_player = 2;
-
-	
-	int computer_plays_both_sides = 0;
-	int hide_player_two = 1; 
-	if ((answer == '1') || (answer == '2')) {
-		printf("Do you want the computer to play both sides (fun to watch) ?\n(Enter '1' for yes, '2' or just 'Enter' for no): ");
-		scanf_s("%c", &answer, 1);
-		if (answer == '1') {
-			computer_plays_both_sides = 1;
-			hide_player_two = 0;
-		}
-	}
-	else
-	{
-		computer_plays_both_sides = 1;
-		hide_player_two = 0;
-	}
-
-	// Select a strategy for player 2
-	player_2.strategy = 2;
-	player_2.strategy1.strategy_stage= 0;
-	init_strategy2(&player_2);
-
-	// Open the log file
-	fopen_s(&log_file, "battleship.log", "w");
-
-	int game_over = 0;  // 0 = game is still going,  1 = game over!
-	int hit_or_miss = 0;	// 0 = shot was a miss, 1 = shot was a hit
-	int target_sunk = 0;
-	int target_row, target_col;
-	while (game_over == 0) {
-
-		display_board(&player_1, 0);
-		printf("\n");
-		//display_board(&player_2, hide_player_two);  // show full board during debugging
-		//printf("\n");
-		display_radar(&player_2, &player_1);
-		*/
-
-		/*
-		if (current_player == 1) {  // Player 1's turn
-			hit_or_miss = 0;
-			target_sunk = 0;
-			if (computer_plays_both_sides == 0) {
-				enter_a_target(&player_1, &player_2, &target_row, &target_col);  // comment out this line and enable line below for auto entry
-			}
-			else {
-				pick_a_target(&player_1, &player_2, &target_row, &target_col);  // wow, fast for debugging
-			}
-			hit_or_miss = check_shot(&player_1, &player_2, target_row, target_col, &ship_type_hit);
-
-			if (hit_or_miss == 1) {
-				//printf("%s scored a Hit!\n\n", player_1.name);
-				target_sunk = check_if_sunk_ship(&player_2, ship_type_hit);
-				if (target_sunk == 1) {  // if this type of ship was sunk print a message
-					//printf("\n**** SHIP LOST ****\n");
-
-					// Ok ship was lost, now check to see if the game is over
-					if (is_winner(&player_2) == 1) {  // there are no more ships floating for player2, player 1 wins
-						//printf("********** %s WINS ************", player_1.name);
-
-						
-						print_game_board(&player_1);
-						printf("\n");
-						print_game_board(&player_2);  // show full board during debugging
-						printf("is_winner = %d", is_winner(&player_2));
-						
-						game_over = 1;
-					}
-				}
-			}
-
-			
-			//else printf("%s missed...\n\n", player_1.name);
-
-			// output_current_move(log_file, &player_1, target_row, target_col, hit_or_miss, target_sunk, game_over);
-
-
-
-
-		//}
-		//else 
-		{						// Player 2's turn
-
-
-			hit_or_miss = 0;
-			target_sunk = 0;
-			pick_a_target(&player_2, &player_1, &target_row, &target_col);
-
-
-
-
-			hit_or_miss = check_shot(&player_2, &player_1, target_row, target_col, &ship_type_hit);
-
-			
-			if (hit_or_miss == 1) {
-				printf("%s scored a Hit !\n\n", player_2.name);
-				target_sunk = check_if_sunk_ship(&player_1, ship_type_hit);
-				if (target_sunk == 1) {  // if this type of ship was sunk print a message
-					printf("\n**** SHIP LOST ****\n");
-
-					// Ok ship was lost, now check to see if the game is over
-					if (is_winner(&player_1) == 1) {  // there are no more ships floating for player1, player 2 wins
-						printf("********** %s WINS ************", player_2.name);
-						
-						print_game_board(&player_1);
-						printf("\n");
-						print_game_board(&player_2);  // show full board during debugging
-						printf("is_winner = %d", is_winner(&player_1));
-						
-						game_over = 1;
-					}
-				}
-			}
-			else printf("%s missed...\n\n", player_2.name);
-
-
-			output_current_move(log_file, &player_2, target_row, target_col, hit_or_miss, target_sunk, game_over);
-			output_strategy(log_file, &player_2);
-			output_boards(log_file, &player_1, &player_2);
-
-
-
-		}
-
-		// Alternate the current player btwn 1 and 2
-		if (current_player == 1) current_player = 2; 
-		else
-		{
-			if (current_player == 2) current_player = 1;
-			printf("Exit game ?\n(Enter '1' for yes, '2' or just 'Enter' for no): ");
-			scanf_s("%c", &answer, 1);
-			if (answer == '1') game_over = 1;
-		}
-		if (game_over == 0) system("cls");
-	}
-
-
-	// Open the log file
-	// output_stats(log_file, &player_1);
-	output_stats(log_file, &player_2);
-	fclose(log_file);
-
-}
-
-*/

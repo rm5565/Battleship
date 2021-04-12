@@ -2,11 +2,11 @@
 #include "header.h"
 
 
-//  BELOW HERE ARE BOARD SETUP FUNCTIONS
+//  BELOW HERE ARE PLAYER AND BOARD SETUP FUNCTIONS
 // --------------------------------------------------
 
 // Initialize a blank board
-void initialize_player(struct player_data* player, char* name) {
+void initialize_player(struct player_data* player, char* name, int strategy) {
 	strncpy_s(player->name, 20, name, strlen(name));
 	for (int i = 0; i < 10; i++) {
 		for (int j = 0; j < 10; j++) {
@@ -16,9 +16,35 @@ void initialize_player(struct player_data* player, char* name) {
 	}
 	player->total_hits = 0;
 	player->total_misses = 0;
-	player->strategy = 0;
-}
+	player->strategy = strategy;
 
+
+	player->target_queue.read_ptr = 0;
+	player->target_queue.write_ptr = 0;
+	player->target_queue.size = 100;
+	for (int i = 0; i < 100; i++) {
+		player->target_queue.queue[i][0] = 0;
+		player->target_queue.queue[i][1] = 0;
+		player->target_queue.queue[i][2] = 0;
+	}
+
+
+
+	if (player->strategy == 4) {  // try pre-seeding shots into specific areas at the start of the game, then go random
+		// this doesn't work out well.  Most of the time it puts the strategy several moves behind strategy 3
+/*		add_new_hit_to_queue(player, 5, 1, UnknownShip);
+		add_new_hit_to_queue(player, 1, 8, UnknownShip);
+		add_new_hit_to_queue(player, 8, 2, UnknownShip);
+		add_new_hit_to_queue(player, 8, 8, UnknownShip);
+
+		add_new_hit_to_queue(player, 3, 3, UnknownShip);
+		add_new_hit_to_queue(player, 4, 7, UnknownShip);
+		add_new_hit_to_queue(player, 7, 3, UnknownShip);
+		add_new_hit_to_queue(player, 7, 7, UnknownShip);
+		*/
+	}
+
+}
 
 
 // Function to validate the position of the ship is ok,
@@ -161,9 +187,9 @@ void debug_place_one_ship(struct player_data* player, int ship_type, int row, in
 
 void debug_place_ships_on_board(struct player_data* player) {
 
-	debug_place_one_ship(player, Carrier,  2, 5, Vertical);
-	debug_place_one_ship(player, Battleship, 0, 0, Horizontal);
-	debug_place_one_ship(player, Cruiser, 8, 8, Vertical);
-	debug_place_one_ship(player, Submarine, 3, 7, Horizontal);
-	debug_place_one_ship(player, Destroyer, 8, 2, Horizontal);
+	debug_place_one_ship(player, Carrier,  1, 1, Vertical);
+	debug_place_one_ship(player, Battleship, 0, 5, Horizontal);
+	debug_place_one_ship(player, Cruiser, 9, 1, Horizontal);
+	debug_place_one_ship(player, Submarine, 7, 2, Horizontal);
+	debug_place_one_ship(player, Destroyer, 3, 2, Vertical);
 }

@@ -1,6 +1,6 @@
 
 
-#include "header.h""
+#include "header.h"
 
 
 
@@ -22,10 +22,27 @@ void randmonly_pick_a_target(struct player_data* shooting_player, int* target_ro
 
 
 
-void getTargetRecommendation(struct player_data* shooting_player, int* target_row, int* target_col) {
-
-
+void getTargetRecommendation(struct player_data* shooting_player, int* target_row, int* target_col, int round) {
 	
-	randmonly_pick_a_target(shooting_player, target_row, target_col);
+	switch (shooting_player->strategy) {
+
+	case 1:
+		randmonly_pick_a_target(shooting_player, target_row, target_col);
+		break;
+
+	case 2:
+		break;
+
+	case 3:
+	case 4:
+		if (shooting_player->target_queue.read_ptr != shooting_player->target_queue.write_ptr) { // there's a possible target in the queue
+			*target_row = shooting_player->target_queue.queue[shooting_player->target_queue.read_ptr][0];
+			*target_col = shooting_player->target_queue.queue[shooting_player->target_queue.read_ptr][1];
+			shooting_player->target_queue.read_ptr = (shooting_player->target_queue.read_ptr + 1) % 100;
+		}
+		else
+			randmonly_pick_a_target(shooting_player, target_row, target_col);
+		break;
+	}
 
 }

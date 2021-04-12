@@ -30,9 +30,6 @@
     <ClCompile Include="targetting.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="strategy2.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="conversions.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -43,6 +40,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="update.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="display.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

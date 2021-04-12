@@ -5,13 +5,25 @@
 #define _CRT_SECURE_NO_WARNINGS
 
 
-void  welcome_screen(void) {
-	char answer;
-	printf("Rules of the Game\n");
-	printf("This is a two player game. Player1 is you and Player2 is the computer. \nPick a pair of numbers (0-9) to guess where the enemy's ships are\n ");
-	printf("Hit enter to start the game.\n");
-	scanf_s("%c", &answer, 1);
+extern int game_over;
+extern int CTRL_C;
+
+BOOL WINAPI CtrlHandler(DWORD fdwCtrlType)
+{
+	switch (fdwCtrlType)
+	{
+		// Handle the CTRL-C signal.
+	case CTRL_C_EVENT:
+		printf("%s%s%s", LINE25_CURSOR, SHOW_CURSOR, BG_black);
+		// Beep(750, 300);
+		game_over = 1;
+		CTRL_C = 1;
+		return TRUE;
+	default: return FALSE;
+	}
 }
+
+
 
 
 // Return 1 or 2 for player 1 or player 2
@@ -24,7 +36,7 @@ int select_who_starts_first(void) {
 
 
 // Return 1 if all the ships have been sunk
-int is_winner(struct player_data* target_player) {
+int check_if_all_ships_sunk(struct player_data* target_player) {
 
 	int i = 0;
 	int j = 0;
@@ -51,70 +63,6 @@ int is_winner(struct player_data* target_player) {
 }
 
 
-
-
-
-void display_boards(struct player_data* shooting_player, struct player_data* target_player, int hidden) {
-
-
-	char radar[10][10];
-	fill_in_radar(radar, shooting_player, target_player);
-
-
-
-	printf("%s's board:		%s's history 				 %s's Radar\n", target_player->name, shooting_player->name, shooting_player->name);
-	printf("  0 1 2 3 4 5 6 7 8 9		0 1 2 3 4 5 6 7 8 9			  0 1 2 3 4 5 6 7 8 9\n");
-	for (int i = 0; i < 10; i++) {
-		printf("%d ", i);
-		for (int j = 0; j < 10; j++) {
-			if (hidden == 0) {
-				printf("%c ", target_player->game_board[i][j]);
-			}
-			else {
-				if ((target_player->game_board[i][j] == 'c')
-					||
-					(target_player->game_board[i][j] == 'b')
-					||
-					(target_player->game_board[i][j] == 'r')
-					||
-					(target_player->game_board[i][j] == 's')
-					||
-					(target_player->game_board[i][j] == 'd'))
-				{
-					printf("%c ", '-');
-				}
-				else {
-					printf("%c ", target_player->game_board[i][j]);
-				}
-			}
-		}
-		printf("		");
-		for (int j = 0; j < 10; j++) {
-			printf("%c ", shooting_player->enemy_board[i][j]);
-		}
-		printf("			");
-		for (int j = 0; j < 10; j++) {
-			printf("%c ", radar[i][j]);
-		}
-		printf("\n");
-	}
-}
-
-
-void display_radar(struct player_data* shooting_player, struct player_data* target_player) {
-	char radar[10][10];
-	fill_in_radar(radar, shooting_player, target_player);
-
-	printf("%s's radar:\n", shooting_player->name);
-	printf("  0 1 2 3 4 5 6 7 8 9\n");
-	for (int i = 0; i < 10; i++) {
-		printf("%d ", i);
-		for (int j = 0; j < 10; j++) {
-			printf("%c ", radar[i][j]);
-		}
-		printf("\n");
-	}
-}
 
 
 

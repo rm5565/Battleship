@@ -5,11 +5,57 @@
 
 // Log file support
 // --------------------------------------------------
-void output_stats(FILE* log_file, struct player_data* player) {
-	fprintf(log_file, "\n\nPLAYER STATS\n");
-	fprintf(log_file, "%s, hits=%d, misses=%d, ratio=%f\n ", player->name, player->total_hits, player->total_misses,  (double) (player->total_hits / (player->total_hits + player->total_misses)));
 
+void output_target_queue(FILE* log_file, struct player_data* player) {
+	int items_in_queue = (player->target_queue.write_ptr - player->target_queue.read_ptr + player->target_queue.size) % 100;
+	fprintf(log_file, "%s's target queue (r=%d w=%d l=%d): ", player->name, player->target_queue.read_ptr, player->target_queue.write_ptr, items_in_queue);
+	for (int i = 0; i < items_in_queue; i++) {
+		int ptr = (i + player->target_queue.read_ptr) % 100;
+		fprintf(log_file, "  %d %d", player->target_queue.queue[ptr][0], player->target_queue.queue[ptr][1]);
+	}
+	fprintf(log_file, "\n");
 }
+
+
+
+void output_stats(FILE* log_file, struct player_data* player_1, struct player_data* player_2, int rounds_played) {
+	double success_rate = 0.0;
+
+	fprintf(log_file, "Rounds played: %d\n", rounds_played);
+	if (player_1->total_hits + player_1->total_misses > 0) success_rate = (double)player_1->total_hits / (player_1->total_hits + player_1->total_misses) * 100;
+	fprintf(log_file, "%s stats using strategy %d:\nHits:  %d    Misses  %d     Success Rate = %f%%\n", player_1->name, player_1->strategy, player_1->total_hits, player_1->total_misses, success_rate);
+
+	success_rate = 0.0;
+	if (player_2->total_hits + player_2->total_misses > 0) success_rate = (double)player_2->total_hits / (player_2->total_hits + player_2->total_misses) * 100;
+	fprintf(log_file, "%s stats using strategy %d:\nHits:  %d    Misses  %d     Success Rate = %f%%\n", player_2->name, player_2->strategy, player_2->total_hits, player_2->total_misses, success_rate);
+}
+
+
+void output_CSV(FILE* csv_file, struct player_data* player_1, struct player_data* player_2, int rounds_played) {
+	double success_rate = 0.0;
+	/*
+	fprintf(csv_file, "%d,", rounds_played);
+
+	if (player_1->total_hits + player_1->total_misses > 0) success_rate = (double)player_1->total_hits / (player_1->total_hits + player_1->total_misses) * 100;
+	fprintf(csv_file, "%s,", player_1->name);
+	fprintf(csv_file, "%d,", player_1->strategy);
+	fprintf(csv_file, "%d,", player_1->total_hits);
+	fprintf(csv_file, "%d,", player_1->total_misses);
+	fprintf(csv_file, "%2.0f,", success_rate);
+
+
+	success_rate = 0.0;
+	if (player_2->total_hits + player_2->total_misses > 0) success_rate = (double)player_2->total_hits / (player_2->total_hits + player_2->total_misses) * 100;
+	fprintf(csv_file, "%s,", player_2->name);
+	fprintf(csv_file, "%d,", player_2->strategy);
+	fprintf(csv_file, "%d,", player_2->total_hits);
+	fprintf(csv_file, "%d,", player_2->total_misses);
+	fprintf(csv_file, "%2.0f", success_rate);;
+
+	fprintf(csv_file, "%\n");
+	*/
+}
+
 
 // Output the current move
 void output_current_move(FILE* log_file, struct player_data* player, int target_row, int target_col, int hit_or_miss, int target_sunk, int game_over) {
@@ -53,33 +99,22 @@ void fill_in_radar(char radar[10][10], struct player_data* shooting_player, stru
 	
 	for (int row = 0; row < 10; row++) {
 		for (int col = 0; col < 10; col++) {
-			if ((target_player->game_board[row][col] == 'm') || (target_player->game_board[row][col] == '*')) 	radar[row][col] = '.';
-			else 	radar[row][col] = ' ';
+			radar[row][col] = shooting_player->enemy_board[row][col];
 		}
 	}
-	/*
-	for (int i = Carrier; i <= Destroyer; i++) {
-		if (shooting_player->strategy2.ships[i].status != 0) {
-			for (int j = 0; j < shooting_player->strategy2.ships[i].vertical_count; j++)
-			{
 
-				int row = shooting_player->strategy2.ships[i].vertical[j][0];
-				int col = shooting_player->strategy2.ships[i].vertical[j][1];
-				//printf("row, col = %d %d\n ", row, col);
-				radar[row][col] = ship_to_char(i);
+	if ((shooting_player->strategy == 3) || (shooting_player->strategy == 4)) {
+		for (int i = shooting_player->target_queue.read_ptr; i < shooting_player->target_queue.write_ptr; i++) {
 
-			}
-			for (int j = 0; j < shooting_player->strategy2.ships[i].horizontal_count; j++)
-			{
+			int row = shooting_player->target_queue.queue[i][0];
+			int col = shooting_player->target_queue.queue[i][1];
+			int ship_char = ship_to_char(shooting_player->target_queue.queue[i][2]);
 
-				int row = shooting_player->strategy2.ships[i].horizontal[j][0];
-				int col = shooting_player->strategy2.ships[i].horizontal[j][1];
-				//printf("row, col = %d %d\n ", row, col);
-				radar[row][col] = ship_to_char(i);
-			}
+			radar[row][col] = ship_char;
 		}
 	}
-	*/
+
+
 }
 
 
@@ -102,11 +137,11 @@ void output_boards(FILE* log_file, struct player_data* player_1, struct player_d
 		}
 		fprintf(log_file, "			%d ", i);
 		for (int j = 0; j < 10; j++) {
-			fprintf(log_file, "%c ", p2_radar[i][j]);
+			fprintf(log_file, "%c ", player_2->enemy_board[i][j]);
 		}
 		fprintf(log_file, "			%d ", i);
 		for (int j = 0; j < 10; j++) {
-			fprintf(log_file, "%c ", player_2->enemy_board[i][j]);
+			fprintf(log_file, "%c ", p2_radar[i][j]);
 		}
 		fprintf(log_file, "\n");
 	}

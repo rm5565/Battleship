@@ -3,22 +3,6 @@
 
 
 
-int ch_to_ship_type(char ch) {
-	if (ch == 'c') return Carrier;
-	if (ch == 'b') return Battleship;
-	if (ch == 'r') return Cruiser;
-	if (ch == 's') return Submarine;
-	return Destroyer;
-}
-
-int ship_size(int ship_type) {
-	if (ship_type == Carrier) return 5;
-	if (ship_type == Battleship) return 4;
-	if (ship_type == Cruiser) return 3;
-	if (ship_type == Submarine) return 3;
-	return 2;
-}
-
 void init_strategy2(struct player_data* shooting_player) {
 	/*
 	
@@ -107,7 +91,7 @@ void fill_in_ship_info(struct player_data* shooting_player, struct player_data* 
 
 		// Fill in possible targets above the given location
 		int obstruction = 0;  // use this to flag if a cell either has been shot at already or has another ship in it
-		for (int i = 0; (i < ship_size(ship_type) && (obstruction == 0) && (target_row - i >= 0)); i++)
+		for (int i = 0; (i < ship_type_to_ship_size(ship_type) && (obstruction == 0) && (target_row - i >= 0)); i++)
 		{
 			if ((target_player->game_board[target_row - i][target_col] == 'm') || (target_player->game_board[target_row - i][target_col] == '*')) {
 				obstruction = 1;
@@ -192,7 +176,7 @@ void pick_a_target_using_strategy2(struct player_data* shooting_player, struct p
 		*target_col = 5;
 
 		if (target_player->game_board[*target_row][*target_col] != '-') {  // It's a HIT!  (other possibilities weeded out in randmonly_pick_a_target)
-			int ship_type = ch_to_ship_type(target_player->game_board[*target_row][*target_col]);
+			int ship_type = char_to_ship_type(target_player->game_board[*target_row][*target_col]);
 
 			// Fill out possible ship locations based on hit location, ship size, and other ships in the way
 			// which will be used in next stage of the strategy

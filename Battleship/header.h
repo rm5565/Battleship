@@ -4,39 +4,52 @@
 #include <conio.h>
 #include <time.h>
 
+#include <windows.h>
+
 #define _CRT_SECURE_NO_WARNINGS
 
+// https://docs.microsoft.com/en-us/windows/terminal/customize-settings/color-schemes
+// https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#cursor-positioning
+#define BG_sea				"\x1b[44m"
+#define FG_sea_unknown		"\x1b[1;30m"
+#define FG_sea_hit			"\x1b[31m"
+#define FG_sea_radar		"\x1b[1;32m"
+#define FG_sea_missed		"\x1b[1;37m"
+#define axis_label			"\x1b[46m\x1b[1;34m"
+#define BG_black			"\x1b[40m"
+#define ERASE_TO_EOL		"\x1b[0K"			// Erase to end of line
+#define ERASE_DISPLAY		"\x1b[0;0H\x1b[0J"   //   ESC [ <y> ; <x> H
+#define SHOW_CURSOR			"\x1b[?25h"			// DECTCEM	Text Cursor Enable Mode Show
+#define HIDE_CURSOR			"\x1b[?25l"			// DECTCEM	Text Cursor Enable Mode Hide
+#define HOME_CURSOR			"\x1b[0;0H"
+#define LINE25_CURSOR		"\x1b[40;0H"
+#define SAVE_CURSOR_POSN	"\x1b[s"
+#define RESTORE_CURSOR_POSN	"\x1b[u"
 
-struct ship_info { // once we have first hit, we can know all possible locations for that ship, left&right, up&down
-	int status;									// 0 = not found, 1 = found still floating, 2 = sunk
-	int vertical[10][3];						// 10 possible locations, each location has x, y, and confidence value
-	int horizontal[10][3];						// confidence values:  0=moderate, 1=certain
-	int vertical_count, horizontal_count;		// how many in each array
-	int first_hit_row, first_hit_col;			// where the first hit landed
-	int tried_top, tried_bottom;				// taking shots around original hit location to determine orientation
-	int tried_left, tried_right;				// taking shots around original hit location to determine orientation
-	int orientation;							// 0=unknown,  1=vertical,   2=horizontal
+
+enum ship_enum { Carrier, Battleship, Cruiser, Submarine, Destroyer, UnknownShip };
+enum orientation_enum { Unknown_ORIENTATION, Vertical, Horizontal };
+
+
+struct target_queue_data {
+	int read_ptr;
+	int write_ptr;
+	int size;
+	int queue[100][3];  // upto 100 surrounding cells 
 };
-
-
-enum ship_enum { Carrier, Battleship, Cruiser, Submarine, Destroyer };
-enum orientation_enum { Unknown, Vertical, Horizontal };
 
 
 struct strategy3_data {
+	int saved_space;
 
-	int temp;
 };
 
 
-struct strategy2_data {
-	// int original_hit_location_row, original_hit_location_col;
-	int latest_hit_location_row, latest_hit_location_col;
-	int strategy_stage;				// 0 = searching randomly, 1 =  2 =
-	struct ship_info ships[5];  // carrier, battleship, cruiser, submarine, destroyer
-	int ship_of_interest_type;
-	char strategy_message[64];
+struct strategy4_data {
+	int saved_space;
+
 };
+
 
 struct player_data {
 	char name[20];
@@ -45,59 +58,64 @@ struct player_data {
 	int total_hits;
 	int total_misses;
 	int strategy;
-	struct strategy3_data strategy3;
 
-	struct strategy2_data strategy2;
+	struct strategy3_data strategy3;
+	struct strategy3_data strategy4;
+	struct target_queue_data target_queue;
+
 };
 
 
 
 // These are implemented in functions.c
-void  welcome_screen(void);
 int select_who_starts_first(void);
-void display_boards(struct player_data* player, int hidden);
-void display_radar(struct player_data* shooting_player, struct player_data* target_player);
-int check_shot(struct player_data* shooting_player, struct player_data* target_player, int target_row, int target_col, char* ship_type_hit);
 int check_if_sunk_ship(struct player_data* target_player, char target_ship_type);
-int is_winner(struct player_data* target_player);
+int check_if_all_ships_sunk(struct player_data* target_player);
+BOOL WINAPI CtrlHandler(DWORD fdwCtrlType);
 
 // Implemented in targetting.c
 void enter_a_target(struct player_data* shooting_player, struct player_data* target_player, int* target_row, int* target_col);
-void pick_a_target(struct player_data* shooting_player, struct player_data* target_player, int* target_row, int* target_col);
-void randmonly_pick_a_target(struct player_data* shooting_player, struct player_data* target_player, int* target_row, int* target_col);
-
-// Implemented in strategy2.c
-
-void init_strategy2(struct player_data* shooting_player);
-void pick_a_target_using_strategy2(struct player_data* shooting_player, struct player_data* target_player, int* target_row, int* target_col);
 
 // Implemented in boardsetup.c
-void initialize_player(struct player_data* player, char* name);
+void initialize_player(struct player_data* player, char* name, int strategy);
 void manually_place_ships_on_board(struct player_data* player);
 void randomly_place_ships_on_board(struct player_data* player); 
 void debug_place_ships_on_board(struct player_data* player);
 
 // Implemented in logging.c
 void output_current_move(FILE* log_file, struct player_data* player, int target_row, int target_col, int hit_or_miss, int target_sunk, int game_over);
-void output_stats(FILE* log_file, struct player_data* player);
+void output_stats(FILE* log_file, struct player_data* player_1, struct player_data* player_2, int rounds_played);
 void output_strategy(FILE* log_file, struct player_data* shooting_player);
 void output_boards(FILE* log_file, struct player_data* player_1, struct player_data* player_2);
 void fill_in_radar(char radar[10][10], struct player_data* shooting_player, struct player_data* target_player);
+void output_CSV(FILE* csv_file, struct player_data* player_1, struct player_data* player_2, int rounds_played);
+void output_target_queue(FILE* log_file, struct player_data* player);
+
 
 // Implemented in conversions.c
 char ship_to_char(int ship_type);
+char ship_type_to_CHAR(int ship_type);
 int char_to_ship_size(char ch);
-char* get_ship_name(char ch);
+char* char_to_ship_name(char ch);
 char* ship_type_to_ship_name(int ship_type);
 int ship_type_to_ship_size(int ship_type);
 int char_to_ship(char ch);
 
 
 // Implemented in gettarget.h
-void getTargetRecommendation(struct player_data* shooting_player, int* target_row, int* target_col);
+void getTargetRecommendation(struct player_data* shooting_player, int* target_row, int* target_col, int round);
 
 // Implemented in fireat.c
 int fireAtTarget(struct player_data* shooting_player, struct player_data* target_player, int target_row, int target_col, int* ship_type);
 
 // Implemented in update.c
-void updatePlayers(struct player_data* shooting_player, struct player_data* target_player, int firing_result, int target_row, int target_col, int* ship_type);
+void updatePlayers(struct player_data* shooting_player, struct player_data* target_player, int firing_result, int target_row, int target_col, int ship_type);
+void updateTargetingQueue(struct player_data* shooting_player, int target_ship_type);
+void add_new_hit_to_queue(struct player_data* shooting_player, int target_row, int target_col, int ship_type);
+
+// Implemented in display.c
+void display_welcome_screen(void);
+void display_target_queue(struct player_data* player);
+void display_stats(struct player_data* player_1, struct player_data* player_2, int rounds_played);
+void display_boards(struct player_data* shooting_player, struct player_data* target_player, int hidden);
+void display_radar(struct player_data* shooting_player, struct player_data* target_player);

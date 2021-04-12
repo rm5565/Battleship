@@ -6,19 +6,25 @@
 
 
 char ship_to_char(int ship_type) {
-	if (ship_type == Carrier) return 'c';
-	if (ship_type == Battleship) return 'b';
-	if (ship_type == Cruiser) return 'r';
-	if (ship_type == Submarine) return 's';
-	return 'd';
+	switch (ship_type) {
+		case Carrier:		return 'c';	break;
+		case Battleship:	return 'b';	break;
+		case Cruiser:		return 'r';	break;
+		case Submarine:		return 's';	break;
+		case Destroyer:		return 'd';	break;
+		default:			return '?';	
+	}
 }
 
-ship_type_to_CHAR(int ship_type) {
-	if (ship_type == Carrier) return 'C';
-	if (ship_type == Battleship) return 'B';
-	if (ship_type == Cruiser) return 'R';
-	if (ship_type == Submarine) return 'S';
-	return 'D';
+char ship_type_to_CHAR(int ship_type) {
+	switch (ship_type) {
+		case Carrier:		return 'C';	break;
+		case Battleship:	return 'B';	break;
+		case Cruiser:		return 'R';	break;
+		case Submarine:		return 'S';	break;
+		case Destroyer:		return 'D';	break;
+		default:			return '?';	
+	}
 }
 	
 
@@ -29,8 +35,9 @@ int char_to_ship(char ch) {
 		case 'b': return Battleship;	break;
 		case 'r': return Cruiser;		break;
 		case 's': return Submarine;		break;
+		case 'd': return Destroyer;		break;
 	}
-	return Destroyer;
+	return UnknownShip;
 }
 
 
@@ -58,23 +65,25 @@ int ship_type_to_ship_size(int ship_type) {
 
 }
 
-char* get_ship_name(char ch) {
+char* char_to_ship_name(char ch) {
 	switch (ch) {
 	case 'c': return "Carrier"; break;
 	case 'b': return "Battleship"; break;
 	case 'r': return "Cruiser"; break;
 	case 's': return "Submarine"; break;
+	case 'd': return "Destroyer"; break;
 	}
-	return "Destroyer";
+	return "Unknown Ship";
 }
 
 char* ship_type_to_ship_name(int ship_type) {
 	switch (ship_type) {
-	case Carrier: return "Carrier"; break;
-	case Battleship: return "Battleship"; break;
-	case Cruiser: return "Cruiser"; break;
-	case Submarine: return "Submarine"; break;
+	case Carrier:			return "Carrier"; break;
+	case Battleship:		return "Battleship"; break;
+	case Cruiser:			return "Cruiser"; break;
+	case Submarine:			return "Submarine"; break;
+	case Destroyer:			return "Destroyer"; break;
 	}
-	return "Destroyer";
+	return "Unknown Ship";
 }
 

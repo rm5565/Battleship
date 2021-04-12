@@ -141,12 +141,12 @@
   <ItemGroup>
     <ClCompile Include="boardsetup.c" />
     <ClCompile Include="conversions.c" />
+    <ClCompile Include="display.c" />
     <ClCompile Include="fireat.c" />
     <ClCompile Include="functions.c" />
     <ClCompile Include="gettarget.c" />
     <ClCompile Include="logging.c" />
     <ClCompile Include="main.c" />
-    <ClCompile Include="strategy2.c" />
     <ClCompile Include="targetting.c" />
     <ClCompile Include="update.c" />
   </ItemGroup>
