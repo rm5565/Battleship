@@ -11,7 +11,7 @@ int game_over = 0;  // 0 = game is still going,  1 = game over!  global var
 int CTRL_C = 0;
 int strategy_test_mode = 0;
 int pause_between_shots_mode = 0;
-int write_to_log_file = 0;
+int write_to_log_file = 1;
 
 // Play a round 
 // return 1 if game over
