@@ -120,8 +120,12 @@ int main(void) {
 	if (strategy_test_mode == 0) printf("%s", HIDE_CURSOR); else printf(SAVE_CURSOR_POSN);
 
 	for (GAMES = 0; (GAMES < 1000000) && (CTRL_C==0); GAMES++) {
+		
 
-		if (strategy_test_mode == 0) printf("%s%s%s", BG_black, HOME_CURSOR, ERASE_DISPLAY);
+		if (strategy_test_mode == 0) {
+			display_tournament_line(&player_1, &player_2, GAMES, tournament_p1_wins, tournament_p2_wins, tournament_ties);
+			// printf("%s%s%s", BG_black, HOME_CURSOR, ERASE_DISPLAY);
+		} 
 		else {
 			if ((GAMES>0) && (GAMES % 1000 == 0)) {
 				double p1winpercentage = (double)tournament_p1_wins / (tournament_p1_wins + tournament_p2_wins + tournament_ties) * 100;
@@ -131,8 +135,16 @@ int main(void) {
 			}
 		}
 
-		initialize_player(&player_1, "Strategy 3", 3);  // 
-		initialize_player(&player_2, "Strategy 4", 4);  //
+		//Strategies
+		//n 1: Random guess each turn
+		// 2: User enters a target
+		// 3: Random guessing until a hit, then fill target queue with surrounding coordinates
+		// 4: Random guessing until a hit, then fill target queue with surrounding coordinates. trim queue when orientation is known
+		// 5: Fill queue at start of game with a set of targets, then random guessing
+
+
+		initialize_player(&player_1, 1, "Strategy 5", 5);  
+		initialize_player(&player_2, 2, "Strategy 4", 4);  
 		// debug_place_ships_on_board(&player_1);  			add_new_hit_to_queue(&player_2, 5, 1, UnknownShip);
 		// debug_place_ships_on_board(&player_2);			add_new_hit_to_queue(&player_1, 5, 1, UnknownShip);
 		randomly_place_ships_on_board(&player_1);

@@ -6,7 +6,7 @@
 // When a ship is sunk, update the target queue to remove nearby future targets
 void updateTargetingQueue(struct player_data* shooting_player, int target_ship_type) {
 
-	if ((shooting_player->strategy == 3) || (shooting_player->strategy == 4)) { // this only applies to strategies 3 and 4
+	if ((shooting_player->strategy == 3) || (shooting_player->strategy == 4) || (shooting_player->strategy == 5)) { // this only applies to strategies 3 and 4
 		if (shooting_player->target_queue.read_ptr == shooting_player->target_queue.write_ptr) {
 			// no targets in queue, return without doing anything
 			return;
@@ -32,6 +32,10 @@ void updateTargetingQueue(struct player_data* shooting_player, int target_ship_t
 
 void add_new_hit_to_queue(struct player_data* shooting_player, int target_row, int target_col, int ship_type) {
 
+	//printf("adding %d %d to target queue\n", target_row, target_col);
+
+	//char answer;  scanf_s("%c", &answer, 1);
+
 	// Before adding a new target to the queue, lets see if it is already in there.   If so, skip it.
 	int found = 0;
 	for (int i = shooting_player->target_queue.read_ptr; (i < shooting_player->target_queue.write_ptr) && (found == 0); i++) {
@@ -47,7 +51,7 @@ void add_new_hit_to_queue(struct player_data* shooting_player, int target_row, i
 			shooting_player->target_queue.queue[write_ptr][1] = target_col;
 			shooting_player->target_queue.queue[write_ptr][2] = ship_type;
 
-			shooting_player->target_queue.write_ptr = (shooting_player->target_queue.write_ptr + 1) % 100;
+			shooting_player->target_queue.write_ptr = (shooting_player->target_queue.write_ptr + 1) % target_queue_size_max;
 		}
 	}
 }
@@ -84,7 +88,7 @@ void remove_veritcal_hits_from_queue(struct player_data* shooting_player, int ta
 void remove_horizontal_hits_from_queue(struct player_data* shooting_player, int target_row, int target_ship_type) {
 	// copy each element of the queue array back to starting from [0], skipping any that are to either side of a ship
 	// with known orientation.
-	// This algo assumes the array size is so large that buffer wrap is not happening... 100 now.  May need to increase if 
+	// This algo assumes the array size is so large that buffer wrap is not happening...   May need to increase if 
 	// bigger games are tried
 	int write_ptr = 0;
 	for (int i = shooting_player->target_queue.read_ptr; i < shooting_player->target_queue.write_ptr; i++) {

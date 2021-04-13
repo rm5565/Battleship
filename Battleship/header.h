@@ -31,11 +31,12 @@ enum ship_enum { Carrier, Battleship, Cruiser, Submarine, Destroyer, UnknownShip
 enum orientation_enum { Unknown_ORIENTATION, Vertical, Horizontal };
 
 
+#define target_queue_size_max 200
 struct target_queue_data {
 	int read_ptr;
 	int write_ptr;
 	int size;
-	int queue[100][3];  // upto 100 surrounding cells 
+	int queue[target_queue_size_max][3];  // upto 100 surrounding cells 
 };
 
 
@@ -63,6 +64,9 @@ struct player_data {
 	struct strategy3_data strategy4;
 	struct target_queue_data target_queue;
 
+	int player_number;
+	int display_vertical_offset;
+
 };
 
 
@@ -77,7 +81,7 @@ BOOL WINAPI CtrlHandler(DWORD fdwCtrlType);
 void enter_a_target(struct player_data* shooting_player, struct player_data* target_player, int* target_row, int* target_col);
 
 // Implemented in boardsetup.c
-void initialize_player(struct player_data* player, char* name, int strategy);
+void initialize_player(struct player_data* player, int player_number, char* name, int strategy);	
 void manually_place_ships_on_board(struct player_data* player);
 void randomly_place_ships_on_board(struct player_data* player); 
 void debug_place_ships_on_board(struct player_data* player);
@@ -118,4 +122,4 @@ void display_welcome_screen(void);
 void display_target_queue(struct player_data* player);
 void display_stats(struct player_data* player_1, struct player_data* player_2, int rounds_played);
 void display_boards(struct player_data* shooting_player, struct player_data* target_player, int hidden);
-void display_radar(struct player_data* shooting_player, struct player_data* target_player);
+void display_tournament_line(struct player_data* player_1, struct player_data* player_2, int GAMES, int p1_wins, int p2_wins, int ties);

@@ -6,7 +6,7 @@
 // --------------------------------------------------
 
 // Initialize a blank board
-void initialize_player(struct player_data* player, char* name, int strategy) {
+void initialize_player(struct player_data* player, int player_number, char* name, int strategy) {
 	strncpy_s(player->name, 20, name, strlen(name));
 	for (int i = 0; i < 10; i++) {
 		for (int j = 0; j < 10; j++) {
@@ -17,6 +17,8 @@ void initialize_player(struct player_data* player, char* name, int strategy) {
 	player->total_hits = 0;
 	player->total_misses = 0;
 	player->strategy = strategy;
+	player->player_number = player_number;
+	player->display_vertical_offset = (player_number - 1) * 20;
 
 
 	player->target_queue.read_ptr = 0;
@@ -28,22 +30,17 @@ void initialize_player(struct player_data* player, char* name, int strategy) {
 		player->target_queue.queue[i][2] = 0;
 	}
 
+	if (player->strategy == 5) {  // try pre-seeding shots into specific areas at the start of the game, then go random
+		for (int i = 0; i < 10; i++) {
+			for (int j = 0; j < 10; j++) {
+				 //if ((i % 3 == 0) && ( j % 3 == 0)) 
+					 add_new_hit_to_queue(player, i, j, UnknownShip);
+			}
+		}
 
-
-	if (player->strategy == 4) {  // try pre-seeding shots into specific areas at the start of the game, then go random
-		// this doesn't work out well.  Most of the time it puts the strategy several moves behind strategy 3
-/*		add_new_hit_to_queue(player, 5, 1, UnknownShip);
-		add_new_hit_to_queue(player, 1, 8, UnknownShip);
-		add_new_hit_to_queue(player, 8, 2, UnknownShip);
-		add_new_hit_to_queue(player, 8, 8, UnknownShip);
-
-		add_new_hit_to_queue(player, 3, 3, UnknownShip);
-		add_new_hit_to_queue(player, 4, 7, UnknownShip);
-		add_new_hit_to_queue(player, 7, 3, UnknownShip);
-		add_new_hit_to_queue(player, 7, 7, UnknownShip);
-		*/
+		display_target_queue(player);
+		// char answer;  scanf_s("%c", &answer, 1);
 	}
-
 }
 
 

@@ -5,6 +5,15 @@
 // Functions to display data on console
 
 
+// DISPLAY OFFSETS
+#define display_offset_tournament_line	0		// 0: Tournament data
+#define display_offset_round_line		1		// 1: Round #
+#define display_offset_dashes			2		// 2: ---------------------------------
+#define display_offset_target_queue		3		// 3: Target queue
+#define display_offset_reccomended_target 4		// 4: Recommended Target
+#define display_offset_firing_result	 5		// 5: 
+#define display_offset_boards			 6		// 6: Boards
+#define display_offset_baoards			 6		// 6: Boards
 
 void  display_welcome_screen(void) {
 	char answer;
@@ -15,17 +24,38 @@ void  display_welcome_screen(void) {
 }
 
 
+void display_tournament_line(struct player_data* player_1, struct player_data* player_2, int GAMES, int p1_wins, int p2_wins, int ties) {
+	char POSITION_CURSOR[20];
+	strcpy_s(POSITION_CURSOR, sizeof(POSITION_CURSOR), "\x1b[%0;0H");
+
+	double p1winpercentage = 0.00; if (GAMES>0) p1winpercentage = p1_wins / (p1_wins + p2_wins + ties) * 100;
+	double p2winpercentage = 0.00; if (GAMES > 0) p2winpercentage = p2_wins / (p1_wins + p2_wins + ties) * 100;
+	double tiepercentage = 0.00; if (GAMES > 0) tiepercentage = ties / (p1_wins + p2_wins + ties) * 100;
+	printf("%sGAMES: %d   %s wins:%d %2.0f%%    %s wins:%d %2.0f%%  ties:%d %2.0f%%\n", POSITION_CURSOR, GAMES, player_1->name, p1_wins, p1winpercentage, player_2->name, p2_wins, p2winpercentage, ties, tiepercentage);
+
+}
+
+
+
+
+
+
+void display_round_line(int round) {
+
+}
+
 
 void display_target_queue(struct player_data* player) {
-	if ( (player->strategy == 3) || (player->strategy == 4)){
-		int items_in_queue = (player->target_queue.write_ptr - player->target_queue.read_ptr + player->target_queue.size) % 100;
-		printf("%s%s's target queue (r=%d w=%d l=%d): ", ERASE_TO_EOL, player->name, player->target_queue.read_ptr, player->target_queue.write_ptr, items_in_queue);
-		for (int i = 0; i < items_in_queue; i++) {
-			int ptr = (i + player->target_queue.read_ptr) % 100;
-			printf("  %d %d", player->target_queue.queue[ptr][0], player->target_queue.queue[ptr][1]);
-		}
-		printf("\n");
+	char POSITION_CURSOR[20];
+	sprintf_s(POSITION_CURSOR, sizeof(POSITION_CURSOR), "\x1b[%d;0H", player->display_vertical_offset + 4);
+	int items_in_queue = (player->target_queue.write_ptr - player->target_queue.read_ptr + player->target_queue.size) % 100;
+	printf("%s%s%s's target queue (r=%d w=%d l=%d): ", POSITION_CURSOR, ERASE_TO_EOL, player->name, player->target_queue.read_ptr, player->target_queue.write_ptr, items_in_queue);
+	for (int i = 0; i < min (items_in_queue, 10); i++) {
+		int ptr = (i + player->target_queue.read_ptr) % 100;
+		printf("  %d %d", player->target_queue.queue[ptr][0], player->target_queue.queue[ptr][1]);
 	}
+	if (items_in_queue >= 10) printf("...");
+	printf("\n");
 }
 
 
@@ -45,19 +75,11 @@ void display_stats(struct player_data* player_1, struct player_data* player_2, i
 
 
 void display_boards(struct player_data* shooting_player, struct player_data* target_player, int hidden) {
-
+	char POSITION_CURSOR[20];
+	sprintf_s(POSITION_CURSOR, sizeof(POSITION_CURSOR), "\x1b[%d;0H", shooting_player->display_vertical_offset + 5);
 
 	char radar[10][10];
 	fill_in_radar(radar, shooting_player, target_player);
-
-	/*
-#define BG_sea				"\x1b[44m"
-#define FG_sea_unknown		"\x1b[1;30m"
-#define FG_sea_hit			"\x1b[1;32m"
-#define FG_sea_missed		"\x1b[1;33m"
-#define axis_label			"\x1b[46m\x1b[1;30m"
-#define BG_black			"\x1b[40m"
-*/
 
 	printf("%s's board:       %s's history      %s's Radar\n", target_player->name, shooting_player->name, shooting_player->name);
 	printf("%s  0 1 2 3 4 5 6 7 8 9 %s    %s  0 1 2 3 4 5 6 7 8 9 %s    %s  0 1 2 3 4 5 6 7 8 9 \n", axis_label, BG_black, axis_label, BG_black, axis_label);
