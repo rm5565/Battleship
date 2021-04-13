@@ -17,12 +17,14 @@
 #define FG_sea_missed		"\x1b[1;37m"
 #define axis_label			"\x1b[46m\x1b[1;34m"
 #define BG_black			"\x1b[40m"
+#define FG_white			"\x1b[1;30m"
+#define NORMAL_TEXT			"\x1b[40m\x1b[1;30m"
 #define ERASE_TO_EOL		"\x1b[0K"			// Erase to end of line
 #define ERASE_DISPLAY		"\x1b[0;0H\x1b[0J"   //   ESC [ <y> ; <x> H
 #define SHOW_CURSOR			"\x1b[?25h"			// DECTCEM	Text Cursor Enable Mode Show
 #define HIDE_CURSOR			"\x1b[?25l"			// DECTCEM	Text Cursor Enable Mode Hide
 #define HOME_CURSOR			"\x1b[0;0H"
-#define LINE25_CURSOR		"\x1b[40;0H"
+#define LINE40_CURSOR		"\x1b[40;0H"
 #define SAVE_CURSOR_POSN	"\x1b[s"
 #define RESTORE_CURSOR_POSN	"\x1b[u"
 
@@ -73,7 +75,7 @@ struct player_data {
 
 // These are implemented in functions.c
 int select_who_starts_first(void);
-int check_if_sunk_ship(struct player_data* target_player, char target_ship_type);
+int check_if_sunk_ship(struct player_data* target_player, char target_ship_char);
 int check_if_all_ships_sunk(struct player_data* target_player);
 BOOL WINAPI CtrlHandler(DWORD fdwCtrlType);
 
@@ -110,7 +112,7 @@ int char_to_ship(char ch);
 void getTargetRecommendation(struct player_data* shooting_player, int* target_row, int* target_col, int round);
 
 // Implemented in fireat.c
-int fireAtTarget(struct player_data* shooting_player, struct player_data* target_player, int target_row, int target_col, int* ship_type);
+int fireAtTarget(struct player_data* shooting_player, struct player_data* target_player, int target_row, int target_col, int* ship_type, int* ship_sunk, int* game_over);
 
 // Implemented in update.c
 void updatePlayers(struct player_data* shooting_player, struct player_data* target_player, int firing_result, int target_row, int target_col, int ship_type);
@@ -123,3 +125,8 @@ void display_target_queue(struct player_data* player);
 void display_stats(struct player_data* player_1, struct player_data* player_2, int rounds_played);
 void display_boards(struct player_data* shooting_player, struct player_data* target_player, int hidden);
 void display_tournament_line(struct player_data* player_1, struct player_data* player_2, int GAMES, int p1_wins, int p2_wins, int ties);
+void display_round_line(int round);
+void display_divider_line(struct player_data* player);
+void display_firing_result(struct player_data* player, int firing_result, int target_ship_type, int target_ship_sunk, int target_row, int target_col, int game_over);
+void display_recommended_target(struct player_data* shooting_player, int target_row, int target_col);
+void display_restore_screen();

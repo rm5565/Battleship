@@ -14,7 +14,6 @@ BOOL WINAPI CtrlHandler(DWORD fdwCtrlType)
 	{
 		// Handle the CTRL-C signal.
 	case CTRL_C_EVENT:
-		printf("%s%s%s", LINE25_CURSOR, SHOW_CURSOR, BG_black);
 		// Beep(750, 300);
 		game_over = 1;
 		CTRL_C = 1;
@@ -67,7 +66,7 @@ int check_if_all_ships_sunk(struct player_data* target_player) {
 
 
 // Return 1 if the ship was sunk
-int check_if_sunk_ship(struct player_data* target_player, char target_ship_type) {
+int check_if_sunk_ship(struct player_data* target_player, char target_ship_char) {
 	int i = 0;
 	int j = 0;
 	int ship_still_floating = 0;
@@ -75,7 +74,7 @@ int check_if_sunk_ship(struct player_data* target_player, char target_ship_type)
 	while ((i < 10) && (ship_still_floating == 0)) {
 		j = 0;
 		while ((j < 10) && (ship_still_floating == 0)) {
-			if (target_player->game_board[i][j] == target_ship_type) ship_still_floating = 1; // exit while loops as soon as we see another cell for that ship
+			if (target_player->game_board[i][j] == target_ship_char) ship_still_floating = 1; // exit while loops as soon as we see another cell for that ship
 			j = j + 1;
 		}
 		i = i + 1;
