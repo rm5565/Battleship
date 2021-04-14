@@ -75,8 +75,7 @@ struct player_data {
 
 // These are implemented in functions.c
 int select_who_starts_first(void);
-int check_if_sunk_ship(struct player_data* target_player, char target_ship_char);
-int check_if_all_ships_sunk(struct player_data* target_player);
+
 BOOL WINAPI CtrlHandler(DWORD fdwCtrlType);
 
 // Implemented in targetting.c
@@ -99,7 +98,7 @@ void output_target_queue(FILE* log_file, struct player_data* player);
 
 
 // Implemented in conversions.c
-char ship_to_char(int ship_type);
+char ship_type_to_char(int ship_type);
 char ship_type_to_CHAR(int ship_type);
 int char_to_ship_size(char ch);
 char* char_to_ship_name(char ch);
@@ -112,7 +111,9 @@ int char_to_ship(char ch);
 void getTargetRecommendation(struct player_data* shooting_player, int* target_row, int* target_col, int round);
 
 // Implemented in fireat.c
-int fireAtTarget(struct player_data* shooting_player, struct player_data* target_player, int target_row, int target_col, int* ship_type, int* ship_sunk, int* game_over);
+int fireAtTarget(struct player_data* shooting_player, struct player_data* target_player, int target_row, int target_col, int* ship_type);
+int check_if_sunk_ship(struct player_data* target_player, char target_ship_char);
+int check_if_all_ships_sunk(struct player_data* target_player);
 
 // Implemented in update.c
 void updatePlayers(struct player_data* shooting_player, struct player_data* target_player, int firing_result, int target_row, int target_col, int ship_type);
@@ -121,6 +122,7 @@ void add_new_hit_to_queue(struct player_data* shooting_player, int target_row, i
 
 // Implemented in display.c
 void display_welcome_screen(void);
+void display_help(void);
 void display_target_queue(struct player_data* player);
 void display_stats(struct player_data* player_1, struct player_data* player_2, int rounds_played);
 void display_boards(struct player_data* shooting_player, struct player_data* target_player, int hidden);
@@ -130,3 +132,5 @@ void display_divider_line(struct player_data* player);
 void display_firing_result(struct player_data* player, int firing_result, int target_ship_type, int target_ship_sunk, int target_row, int target_col, int game_over);
 void display_recommended_target(struct player_data* shooting_player, int target_row, int target_col);
 void display_restore_screen();
+void display_tournament_line(struct player_data* player_1, struct player_data* player_2, int GAMES, int p1_wins, int p2_wins, int ties);
+void display_tournament_line_in_strategy_test_mode(struct player_data* player_1, struct player_data* player_2, int GAMES, int p1_wins, int p2_wins, int ties);

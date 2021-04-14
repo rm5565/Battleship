@@ -5,7 +5,7 @@
 
 
 
-char ship_to_char(int ship_type) {
+char ship_type_to_char(int ship_type) {
 	switch (ship_type) {
 		case Carrier:		return 'c';	break;
 		case Battleship:	return 'b';	break;

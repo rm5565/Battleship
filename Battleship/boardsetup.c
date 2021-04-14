@@ -18,7 +18,7 @@ void initialize_player(struct player_data* player, int player_number, char* name
 	player->total_misses = 0;
 	player->strategy = strategy;
 	player->player_number = player_number;
-	player->display_vertical_offset = (player_number - 1) * 20;
+	player->display_vertical_offset = (player_number - 1) * 18;
 
 
 	player->target_queue.read_ptr = 0;
@@ -171,12 +171,12 @@ void debug_place_one_ship(struct player_data* player, int ship_type, int row, in
 
 		if (orientation == Vertical) {
 
-			player->game_board[row + i][col] = ship_to_char(ship_type);
+			player->game_board[row + i][col] = ship_type_to_char(ship_type);
 
 		}
 		else  // Horizontal
 		{
-			player->game_board[row][col + i] = ship_to_char(ship_type);
+			player->game_board[row][col + i] = ship_type_to_char(ship_type);
 		}
 	}
 }

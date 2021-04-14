@@ -23,17 +23,37 @@ void  display_welcome_screen(void) {
 	scanf_s("%c", &answer, 1);
 }
 
+void display_help(void) {
+	printf("-t     run in strategy test mode, no animation\n");
+	printf("-log   write log info for each game to battleship.log (overwrites each game)\n");
+	printf("-csv   write strategy test info to a CSV file, battleship.csv.  (appends each game)\n");
+	printf("-p     pause for user to press Enter at end of each round\n");
+}
 
+void build_tournament_line(char* s, struct player_data* player_1, struct player_data* player_2, int GAMES, int p1_wins, int p2_wins, int ties) {
+
+	double p1winpercentage = 0.00; if (GAMES > 0) p1winpercentage = (double)p1_wins / (p1_wins + p2_wins + ties) * 100;
+	double p2winpercentage = 0.00; if (GAMES > 0) p2winpercentage = (double)p2_wins / (p1_wins + p2_wins + ties) * 100;
+	double tiepercentage = 0.00; if (GAMES > 0) tiepercentage = (double)ties / (p1_wins + p2_wins + ties) * 100;
+	sprintf_s(s, 256, "GAMES: %d   %s wins:%d %2.1f%%    %s wins:%d %2.1f%%  ties:%d %2.1f%%", GAMES, player_1->name, p1_wins, p1winpercentage, player_2->name, p2_wins, p2winpercentage, ties, tiepercentage);
+
+}
 void display_tournament_line(struct player_data* player_1, struct player_data* player_2, int GAMES, int p1_wins, int p2_wins, int ties) {
+	char line[256];
 	char POSITION_CURSOR[20];
 	strcpy_s(POSITION_CURSOR, sizeof(POSITION_CURSOR), "\x1b[1;1H");
 
-	double p1winpercentage = 0.00; if (GAMES>0) p1winpercentage = (double) p1_wins / (p1_wins + p2_wins + ties) * 100;
-	double p2winpercentage = 0.00; if (GAMES > 0) p2winpercentage = (double) p2_wins / (p1_wins + p2_wins + ties) * 100;
-	double tiepercentage = 0.00; if (GAMES > 0) tiepercentage = (double) ties / (p1_wins + p2_wins + ties) * 100;
-	printf("%sGAMES: %d   %s wins:%d %2.0f%%    %s wins:%d %2.0f%%  ties:%d %2.0f%%\n", POSITION_CURSOR, GAMES, player_1->name, p1_wins, p1winpercentage, player_2->name, p2_wins, p2winpercentage, ties, tiepercentage);
-
+	build_tournament_line(line, player_1, player_2, GAMES, p1_wins, p2_wins, ties);
+	printf("%s%s", POSITION_CURSOR, line);
 }
+
+void display_tournament_line_in_strategy_test_mode(struct player_data* player_1, struct player_data* player_2, int GAMES, int p1_wins, int p2_wins, int ties) {
+	char line[256];
+
+	build_tournament_line(line, player_1, player_2, GAMES, p1_wins, p2_wins, ties);
+	printf("%s%s", RESTORE_CURSOR_POSN, line);
+}
+
 
 void display_divider_line(struct player_data* player) {
 	char POSITION_CURSOR[20];

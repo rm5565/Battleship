@@ -108,7 +108,7 @@ void fill_in_radar(char radar[10][10], struct player_data* shooting_player, stru
 
 			int row = shooting_player->target_queue.queue[i][0];
 			int col = shooting_player->target_queue.queue[i][1];
-			int ship_char = ship_to_char(shooting_player->target_queue.queue[i][2]);
+			int ship_char = ship_type_to_char(shooting_player->target_queue.queue[i][2]);
 
 			radar[row][col] = ship_char;
 		}
