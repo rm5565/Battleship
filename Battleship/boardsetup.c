@@ -31,15 +31,12 @@ void initialize_player(struct player_data* player, int player_number, char* name
 	}
 
 	if (player->strategy == 5) {  // try pre-seeding shots into specific areas at the start of the game, then go random
-		for (int i = 0; i < 10; i++) {
-			for (int j = 0; j < 10; j++) {
-				 if ((i % 3 == 0) && ( j % 3 == 0)) 
+		for (int i = 2; i < 8; i++) {
+			for (int j = 2; j < 8; j++) {
+				 if ((i % 2 == 0) && ( j % 2 == 0)) 
 					 add_new_hit_to_queue(player, i, j, UnknownShip);
 			}
 		}
-
-		display_target_queue(player);
-		// char answer;  scanf_s("%c", &answer, 1);
 	}
 }
 

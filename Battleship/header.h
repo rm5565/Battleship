@@ -69,25 +69,18 @@ struct player_data {
 	int player_number;
 	int display_vertical_offset;
 
+	int total_tournament_hits;
+	int total_tournament_misses;
 };
-
 
 struct game_data {
 	int player_1_wins;
 	int player_2_wins;
 	int ties;
 	int total_games;
-
 	FILE* log_file;
-	FILE *csv_file;
-
 	unsigned int random_seed;
-
-
-
 };
-
-
 
 // These are implemented in functions.c
 BOOL WINAPI CtrlHandler(DWORD fdwCtrlType);
@@ -103,11 +96,11 @@ void debug_place_ships_on_board(struct player_data* player);
 
 // Implemented in logging.c
 void output_current_move(FILE* log_file, struct player_data* player, int target_row, int target_col, int hit_or_miss, int target_sunk, int game_over);
-void output_stats(FILE* log_file, struct player_data* player_1, struct player_data* player_2, int rounds_played);
+void output_game_stats(struct player_data* player_1, struct player_data* player_2, struct game_data* game, int rounds_played);
+void output_tournament_stats(struct player_data* player_1, struct player_data* player_2, struct game_data* game);
 void output_strategy(FILE* log_file, struct player_data* shooting_player);
 void output_boards(FILE* log_file, struct player_data* player_1, struct player_data* player_2);
 void fill_in_radar(char radar[10][10], struct player_data* shooting_player, struct player_data* target_player);
-void output_CSV(FILE* csv_file, struct player_data* player_1, struct player_data* player_2, int rounds_played);
 void output_target_queue(FILE* log_file, struct player_data* player);
 
 

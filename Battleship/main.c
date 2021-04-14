@@ -15,7 +15,11 @@ int CTRL_C = 0;
 boolean animate_display = 1;
 int pause_between_shots_mode = 0;
 int write_to_log_file = 0;
-int write_to_csv_file = 0;
+
+char* player1_name = "Stategy 4";
+int player1_strategy = 4;
+char* player2_name = "Stategy 5";
+int player2_strategy = 5;
 
 // Play a round 
 // return 1 if game over
@@ -83,8 +87,8 @@ int play_a_round(struct player_data* shooting_player, struct player_data* target
 
 void run_single_game(struct player_data* player_1, struct player_data* player_2, struct game_data* game) {
 
-	initialize_player(player_1, 1, "Strategy 4", 4);
-	initialize_player(player_2, 2, "Strategy 3", 3);
+	initialize_player(player_1, 1, player1_name, player1_strategy);
+	initialize_player(player_2, 2, player2_name, player2_strategy);
 	//debug_place_ships_on_board(player_1);  			add_new_hit_to_queue(&player_2, 5, 1, UnknownShip);
 	//debug_place_ships_on_board(player_2);				add_new_hit_to_queue(&player_1, 5, 1, UnknownShip);
 	randomly_place_ships_on_board(player_1);
@@ -108,16 +112,18 @@ void run_single_game(struct player_data* player_1, struct player_data* player_2,
 	else game->player_2_wins++;
 	game->total_games++;
 
+	player_1->total_tournament_hits += player_1->total_hits;
+	player_1->total_tournament_misses += player_1->total_misses;
+	player_2->total_tournament_hits += player_2->total_hits;
+	player_2->total_tournament_misses += player_2->total_misses;
 
-	if (write_to_log_file) output_stats(game->log_file, player_1, player_2, round);
-	if (write_to_csv_file) output_CSV(game->csv_file, player_1, player_2, round);
+	if (write_to_log_file) output_game_stats(player_1, player_2, game, round);
 }
 
 
 
 void init_game_data(struct game_data* game) {
 	game->log_file			= NULL;
-	game->csv_file			= NULL;
 	game->player_1_wins		= 0;
 	game->player_2_wins		= 0;
 	game->ties				= 0;
@@ -139,15 +145,13 @@ int main(int argc, char *argv[]) {
 	for (int i = 0; i < argc; i++) {
 		if (strcmp(argv[i], "-t") == 0) animate_display = 0;
 		if (strcmp(argv[i], "-log") == 0) write_to_log_file = 1;
-		if (strcmp(argv[i], "-csv") == 0) write_to_csv_file = 1;
 		if (strcmp(argv[i], "-p") == 0) pause_between_shots_mode = 1;
 		if (strcmp(argv[i], "-h") == 0) { display_help(); return; }
 	}
-	
+	// animate_display = 0;   // for debugging 
 	int strategy_test_mode = !animate_display;
 
-	if (write_to_log_file) fopen_s(&game.log_file,  "battleship.log", "w");			// Rewrite open the log file	
-	if (write_to_csv_file) fopen_s(&game.csv_file,  "battleship.csv", "a+");		// Append open the cvs file
+	if (write_to_log_file) fopen_s(&game.log_file,  "battleship_data.log", "w");			// Rewrite open the log file	
 
 	// Set the CTRL-C handler so we can exit nicely
 	SetConsoleCtrlHandler(CtrlHandler, TRUE);
@@ -157,12 +161,19 @@ int main(int argc, char *argv[]) {
 	if (animate_display) printf(HIDE_CURSOR); 
 	if (strategy_test_mode) printf(SAVE_CURSOR_POSN);
 
+
+	// initialize tournament variables
+	player_1.total_tournament_hits = 0;
+	player_1.total_tournament_misses = 0;
+	player_2.total_tournament_hits = 0;
+	player_2.total_tournament_misses = 0;
+
 	if (strategy_test_mode) {  // Run the simulation for 1,000,000 times
 		for (int GAMES = 0; (GAMES < 1000000) && (CTRL_C == 0); GAMES++) {
 			run_single_game(&player_1, &player_2, &game);
 		}
 	}
-	else {  // Run the game until user decides to exit via CTRL-C
+	else {  // Run simulations with animation until user decides to exit via CTRL-C
 
 		// Strategies
 		// 1: Random guess each turn
@@ -173,8 +184,8 @@ int main(int argc, char *argv[]) {
 
 		while (!tournament_over) {
 
-			initialize_player(&player_1, 1, "Strategy 4", 4);
-			initialize_player(&player_2, 2, "Strategy 3", 3);
+			initialize_player(&player_1, 1, player1_name, player1_strategy);
+			initialize_player(&player_2, 2, player2_name, player2_strategy);
 			//debug_place_ships_on_board(&player_1);  			add_new_hit_to_queue(&player_2, 5, 1, UnknownShip);
 			//debug_place_ships_on_board(&player_2);			add_new_hit_to_queue(&player_1, 5, 1, UnknownShip);
 			randomly_place_ships_on_board(&player_1);
@@ -212,9 +223,14 @@ int main(int argc, char *argv[]) {
 			else if (p2_wins == 1)  game.player_2_wins++;
 			game.total_games++;
 
+			player_1.total_tournament_hits += player_1.total_hits;
+			player_1.total_tournament_misses += player_1.total_misses;
+			player_2.total_tournament_hits += player_2.total_hits;
+			player_2.total_tournament_misses += player_2.total_misses;
+
 			//display_stats(&player_1, &player_2, round);
-			if (write_to_log_file) output_stats(log_file, &player_1, &player_2, round);
-			if (write_to_csv_file) output_CSV(csv_file, &player_1, &player_2, round);
+			if (write_to_log_file) output_game_stats(&player_1, &player_2, &game, round);
+
 		}
 	}
 
@@ -226,7 +242,7 @@ int main(int argc, char *argv[]) {
 		display_tournament_line_in_strategy_test_mode(&player_1, &player_2, &game);
 
 	if (animate_display) display_restore_screen();
-	if (write_to_log_file || write_to_csv_file) _fcloseall();
+	if (write_to_log_file) _fcloseall();
 }
 
 

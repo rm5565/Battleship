@@ -6,13 +6,13 @@
 
 
 // DISPLAY OFFSETS
-#define display_offset_tournament_line	1		//  Tournament data
-#define display_offset_round_line		2		//  Round #
-#define display_offset_dashes			3		//  ---------------------------------
-#define display_offset_target_queue		4		//  Target queue
-#define display_offset_recommended_target 5		//  Recommended Target
-#define display_offset_firing_result	 6		//  
-#define display_offset_boards			 7		//  Boards
+#define display_offset_tournament_line		1		//  Tournament data
+#define display_offset_round_line			2		//  Round #
+#define display_offset_dashes				3		//  ---------------------------------
+#define display_offset_target_queue			4		//  Target queue
+#define display_offset_recommended_target	5		//  Recommended Target
+#define display_offset_firing_result		6		//  Firing result
+#define display_offset_boards				7		//  Boards
 
 
 void  display_welcome_screen(void) {
@@ -34,7 +34,9 @@ void build_tournament_line(char* s, struct player_data* player_1, struct player_
 	double p1winpercentage = 0.00; if (game->total_games > 0) p1winpercentage	= (double)game->player_1_wins / game->total_games * 100;
 	double p2winpercentage = 0.00; if (game->total_games > 0) p2winpercentage	= (double)game->player_2_wins / game->total_games * 100;
 	double tiepercentage = 0.00;   if (game->total_games > 0) tiepercentage		= (double)game->ties / game->total_games * 100;
-	sprintf_s(s, 256, "GAMES: %d   %s wins:%d %2.1f%%    %s wins:%d %2.1f%%  ties:%d %2.1f%%", game->total_games, player_1->name, game->player_1_wins, p1winpercentage, player_2->name, game->player_2_wins, p2winpercentage, game->ties, tiepercentage);
+	double p1_accuracy = 0.00; if (game->total_games > 0) p1_accuracy = (double) player_1->total_tournament_hits / (double) (player_1->total_tournament_hits + player_1->total_tournament_misses) * 100.0;
+	double p2_accuracy = 0.00; if (game->total_games > 0) p2_accuracy = (double)player_2->total_tournament_hits / (double) (player_2->total_tournament_hits + player_2->total_tournament_misses) * 100.0;
+	sprintf_s(s, 256, "Games: %d | %s Wins:%d %2.1f%%  Accuracy:%2.0f%% | %s Wins:%d %2.1f%%  Accuracy:%2.0f%% | Ties:%d %2.1f%%", game->total_games, player_1->name, game->player_1_wins, p1winpercentage, p1_accuracy, player_2->name, game->player_2_wins, p2winpercentage, p2_accuracy, game->ties, tiepercentage);
 }
 
 void display_tournament_line(struct player_data* player_1, struct player_data* player_2, struct game_data* game) {
@@ -112,7 +114,7 @@ void display_boards(struct player_data* shooting_player, struct player_data* tar
 	char radar[10][10];
 	fill_in_radar(radar, shooting_player, target_player);
 
-	printf("%s%s's board:       %s's history      %s's Radar\n", POSITION_CURSOR, target_player->name, shooting_player->name, shooting_player->name);
+	printf("%s%s's board         %s's history       %s's Radar\n", POSITION_CURSOR, target_player->name, shooting_player->name, shooting_player->name);
 	printf("%s  0 1 2 3 4 5 6 7 8 9 %s    %s  0 1 2 3 4 5 6 7 8 9 %s    %s  0 1 2 3 4 5 6 7 8 9 \n", axis_label, BG_black, axis_label, BG_black, axis_label);
 	for (int i = 0; i < 10; i++) {
 		printf("%s%d%s%s ", axis_label, i, BG_sea, FG_sea_unknown);

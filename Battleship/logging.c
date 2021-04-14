@@ -18,43 +18,32 @@ void output_target_queue(FILE* log_file, struct player_data* player) {
 
 
 
-void output_stats(FILE* log_file, struct player_data* player_1, struct player_data* player_2, int rounds_played) {
-	double success_rate = 0.0;
+void output_tournament_line(struct player_data* player_1, struct player_data* player_2, struct game_data* game) {
+	double p1winpercentage = 0.00; if (game->total_games > 0) p1winpercentage = (double)game->player_1_wins / game->total_games * 100;
+	double p2winpercentage = 0.00; if (game->total_games > 0) p2winpercentage = (double)game->player_2_wins / game->total_games * 100;
+	double tiepercentage = 0.00;   if (game->total_games > 0) tiepercentage = (double)game->ties / game->total_games * 100;
+	fprintf(game->log_file, "GAMES: %d   %s wins:%d %2.1f%%    %s wins:%d %2.1f%%  ties:%d %2.1f%%", game->total_games, player_1->name, game->player_1_wins, p1winpercentage, player_2->name, game->player_2_wins, p2winpercentage, game->ties, tiepercentage);
 
-	fprintf(log_file, "Rounds played: %d\n", rounds_played);
-	if (player_1->total_hits + player_1->total_misses > 0) success_rate = (double)player_1->total_hits / (player_1->total_hits + player_1->total_misses) * 100;
-	fprintf(log_file, "%s stats using strategy %d:\nHits:  %d    Misses  %d     Success Rate = %f%%\n", player_1->name, player_1->strategy, player_1->total_hits, player_1->total_misses, success_rate);
-
-	success_rate = 0.0;
-	if (player_2->total_hits + player_2->total_misses > 0) success_rate = (double)player_2->total_hits / (player_2->total_hits + player_2->total_misses) * 100;
-	fprintf(log_file, "%s stats using strategy %d:\nHits:  %d    Misses  %d     Success Rate = %f%%\n", player_2->name, player_2->strategy, player_2->total_hits, player_2->total_misses, success_rate);
 }
 
 
-void output_CSV(FILE* csv_file, struct player_data* player_1, struct player_data* player_2, int rounds_played) {
+void output_game_stats(struct player_data* player_1, struct player_data* player_2, struct game_data* game, int rounds_played) {
 	double success_rate = 0.0;
-	/*
-	fprintf(csv_file, "%d,", rounds_played);
 
-	if (player_1->total_hits + player_1->total_misses > 0) success_rate = (double)player_1->total_hits / (player_1->total_hits + player_1->total_misses) * 100;
-	fprintf(csv_file, "%s,", player_1->name);
-	fprintf(csv_file, "%d,", player_1->strategy);
-	fprintf(csv_file, "%d,", player_1->total_hits);
-	fprintf(csv_file, "%d,", player_1->total_misses);
-	fprintf(csv_file, "%2.0f,", success_rate);
-
+	fprintf(game->log_file, "Rounds played: %d\n", rounds_played);
+	if (rounds_played > 0) success_rate = (double)player_1->total_hits / (player_1->total_hits + player_1->total_misses) * 100;
+	fprintf(game->log_file, "%s stats using strategy %d:\nHits:  %d    Misses  %d     Success Rate = %f%%\n", player_1->name, player_1->strategy, player_1->total_hits, player_1->total_misses, success_rate);
 
 	success_rate = 0.0;
-	if (player_2->total_hits + player_2->total_misses > 0) success_rate = (double)player_2->total_hits / (player_2->total_hits + player_2->total_misses) * 100;
-	fprintf(csv_file, "%s,", player_2->name);
-	fprintf(csv_file, "%d,", player_2->strategy);
-	fprintf(csv_file, "%d,", player_2->total_hits);
-	fprintf(csv_file, "%d,", player_2->total_misses);
-	fprintf(csv_file, "%2.0f", success_rate);;
-
-	fprintf(csv_file, "%\n");
-	*/
+	if (rounds_played > 0) success_rate = (double)player_2->total_hits / (player_2->total_hits + player_2->total_misses) * 100;
+	fprintf(game->log_file, "%s stats using strategy %d:\nHits:  %d    Misses  %d     Success Rate = %f%%\n", player_2->name, player_2->strategy, player_2->total_hits, player_2->total_misses, success_rate);
 }
+
+void output_tournament_stats(struct player_data* player_1, struct player_data* player_2, struct game_data* game) {
+
+	// printf("Hit accuracy for %s is %2.1f%", player_1->name, )
+}
+
 
 
 // Output the current move
@@ -71,8 +60,6 @@ void output_current_move(FILE* log_file, struct player_data* player, int target_
 	}
 	fprintf(log_file, "\n");
 }
-
-
 
 
 
@@ -103,7 +90,7 @@ void fill_in_radar(char radar[10][10], struct player_data* shooting_player, stru
 		}
 	}
 
-	if ((shooting_player->strategy == 3) || (shooting_player->strategy == 4)) {
+	if ((shooting_player->strategy == 3) || (shooting_player->strategy == 4) || (shooting_player->strategy == 5)) {
 		for (int i = shooting_player->target_queue.read_ptr; i < shooting_player->target_queue.write_ptr; i++) {
 
 			int row = shooting_player->target_queue.queue[i][0];
