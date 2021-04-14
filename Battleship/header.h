@@ -72,6 +72,22 @@ struct player_data {
 };
 
 
+struct game_data {
+	int player_1_wins;
+	int player_2_wins;
+	int ties;
+	int total_games;
+
+	FILE* log_file;
+	FILE *csv_file;
+
+	unsigned int random_seed;
+
+
+
+};
+
+
 
 // These are implemented in functions.c
 BOOL WINAPI CtrlHandler(DWORD fdwCtrlType);
@@ -123,12 +139,10 @@ void display_welcome_screen(void);
 void display_help(void);
 void display_target_queue(struct player_data* player);
 void display_stats(struct player_data* player_1, struct player_data* player_2, int rounds_played);
-void display_boards(struct player_data* shooting_player, struct player_data* target_player, int hidden);
-void display_tournament_line(struct player_data* player_1, struct player_data* player_2, int GAMES, int p1_wins, int p2_wins, int ties);
-void display_round_line(int round);
+void display_boards(struct player_data* shooting_player, struct player_data* target_player, int hidden);void display_round_line(int round);
 void display_divider_line(struct player_data* player);
 void display_firing_result(struct player_data* player, int firing_result, int target_ship_type, int target_ship_sunk, int target_row, int target_col, int game_over);
 void display_recommended_target(struct player_data* shooting_player, int target_row, int target_col);
 void display_restore_screen();
-void display_tournament_line(struct player_data* player_1, struct player_data* player_2, int GAMES, int p1_wins, int p2_wins, int ties);
-void display_tournament_line_in_strategy_test_mode(struct player_data* player_1, struct player_data* player_2, int GAMES, int p1_wins, int p2_wins, int ties);
+void display_tournament_line(struct player_data* player_1, struct player_data* player_2, struct game_data* game);
+void display_tournament_line_in_strategy_test_mode(struct player_data* player_1, struct player_data* player_2, struct game_data* game);

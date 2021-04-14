@@ -30,30 +30,27 @@ void display_help(void) {
 	printf("-p     pause for user to press Enter at end of each round\n");
 }
 
-void build_tournament_line(char* s, struct player_data* player_1, struct player_data* player_2, int GAMES, int p1_wins, int p2_wins, int ties) {
-
-	double p1winpercentage = 0.00; if (GAMES > 0) p1winpercentage = (double)p1_wins / (p1_wins + p2_wins + ties) * 100;
-	double p2winpercentage = 0.00; if (GAMES > 0) p2winpercentage = (double)p2_wins / (p1_wins + p2_wins + ties) * 100;
-	double tiepercentage = 0.00; if (GAMES > 0) tiepercentage = (double)ties / (p1_wins + p2_wins + ties) * 100;
-	sprintf_s(s, 256, "GAMES: %d   %s wins:%d %2.1f%%    %s wins:%d %2.1f%%  ties:%d %2.1f%%", GAMES, player_1->name, p1_wins, p1winpercentage, player_2->name, p2_wins, p2winpercentage, ties, tiepercentage);
-
+void build_tournament_line(char* s, struct player_data* player_1, struct player_data* player_2, struct game_data* game) {
+	double p1winpercentage = 0.00; if (game->total_games > 0) p1winpercentage	= (double)game->player_1_wins / game->total_games * 100;
+	double p2winpercentage = 0.00; if (game->total_games > 0) p2winpercentage	= (double)game->player_2_wins / game->total_games * 100;
+	double tiepercentage = 0.00;   if (game->total_games > 0) tiepercentage		= (double)game->ties / game->total_games * 100;
+	sprintf_s(s, 256, "GAMES: %d   %s wins:%d %2.1f%%    %s wins:%d %2.1f%%  ties:%d %2.1f%%", game->total_games, player_1->name, game->player_1_wins, p1winpercentage, player_2->name, game->player_2_wins, p2winpercentage, game->ties, tiepercentage);
 }
-void display_tournament_line(struct player_data* player_1, struct player_data* player_2, int GAMES, int p1_wins, int p2_wins, int ties) {
+
+void display_tournament_line(struct player_data* player_1, struct player_data* player_2, struct game_data* game) {
 	char line[256];
 	char POSITION_CURSOR[20];
 	strcpy_s(POSITION_CURSOR, sizeof(POSITION_CURSOR), "\x1b[1;1H");
-
-	build_tournament_line(line, player_1, player_2, GAMES, p1_wins, p2_wins, ties);
+	build_tournament_line(line, player_1, player_2, game);
 	printf("%s%s", POSITION_CURSOR, line);
 }
 
-void display_tournament_line_in_strategy_test_mode(struct player_data* player_1, struct player_data* player_2, int GAMES, int p1_wins, int p2_wins, int ties) {
+void display_tournament_line_in_strategy_test_mode(struct player_data* player_1, struct player_data* player_2, struct game_data *game) {
 	char line[256];
 
-	build_tournament_line(line, player_1, player_2, GAMES, p1_wins, p2_wins, ties);
+	build_tournament_line(line, player_1, player_2, game);
 	printf("%s%s", RESTORE_CURSOR_POSN, line);
 }
-
 
 void display_divider_line(struct player_data* player) {
 	char POSITION_CURSOR[20];
@@ -85,7 +82,7 @@ void display_firing_result(struct player_data* player, int firing_result, int ta
 			printf("%s%sBombardment of %d %d was a HIT!!%s", POSITION_CURSOR, ERASE_TO_EOL, target_row, target_col, NORMAL_TEXT);
 			// fprintf(log_file, "HIT on a %s\n", ship_type_to_ship_name(target_ship_type)); // normally user doesn't know type until ship is sunk
 		} else { // ship 
-			printf("%s%sBombardment of %d %d was a %s%sHIT AND SUNK a %s%s!", POSITION_CURSOR, ERASE_TO_EOL, target_row, target_col, BG_sea, FG_sea_hit, ship_type_to_ship_name(target_ship_type), NORMAL_TEXT);
+			printf("%s%sBombardment of %d %d was a %s%sHIT AND SUNK a %s!%s", POSITION_CURSOR, ERASE_TO_EOL, target_row, target_col, BG_sea, FG_sea_hit, ship_type_to_ship_name(target_ship_type), NORMAL_TEXT);
 		}
 	}
 }
@@ -101,7 +98,6 @@ void display_target_queue(struct player_data* player) {
 		printf("  %d %d", player->target_queue.queue[ptr][0], player->target_queue.queue[ptr][1]);
 	}
 	if (items_in_queue >= 10) printf("...");
-	printf("\n");
 }
 
 
