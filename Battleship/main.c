@@ -124,8 +124,8 @@ int main(int argc, char *argv[]) {
 		// 4: Random guessing until a hit, then fill target queue with surrounding coordinates. Trim queue when orientation is known
 		// 5: Fill queue at start of game with a set of targets, then random guessing
 
-		initialize_player(&player_1, 1, "Strategy 3", 3);
-		initialize_player(&player_2, 2, "Strategy 4", 4);
+		initialize_player(&player_1, 1, "Strategy 4", 4);
+		initialize_player(&player_2, 2, "Strategy 3", 3);
 		//debug_place_ships_on_board(&player_1);  			add_new_hit_to_queue(&player_2, 5, 1, UnknownShip);
 		//debug_place_ships_on_board(&player_2);			add_new_hit_to_queue(&player_1, 5, 1, UnknownShip);
 		randomly_place_ships_on_board(&player_1);

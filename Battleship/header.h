@@ -74,8 +74,6 @@ struct player_data {
 
 
 // These are implemented in functions.c
-int select_who_starts_first(void);
-
 BOOL WINAPI CtrlHandler(DWORD fdwCtrlType);
 
 // Implemented in targetting.c

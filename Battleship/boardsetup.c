@@ -33,7 +33,7 @@ void initialize_player(struct player_data* player, int player_number, char* name
 	if (player->strategy == 5) {  // try pre-seeding shots into specific areas at the start of the game, then go random
 		for (int i = 0; i < 10; i++) {
 			for (int j = 0; j < 10; j++) {
-				 //if ((i % 3 == 0) && ( j % 3 == 0)) 
+				 if ((i % 3 == 0) && ( j % 3 == 0)) 
 					 add_new_hit_to_queue(player, i, j, UnknownShip);
 			}
 		}
@@ -103,7 +103,6 @@ void manually_place_one_ship(struct player_data* player, char* name_of_ship, cha
 		player->game_board[ship_coordinates[i][0]][ship_coordinates[i][1]] = char_of_ship;
 	}
 
-	// print_game_board(player);
 }
 
 
@@ -150,7 +149,6 @@ void randomly_place_one_ship(struct player_data* player, char* name_of_ship, cha
 		player->game_board[ship_coordinates[i][0]][ship_coordinates[i][1]] = char_of_ship;
 	}
 
-	// print_game_board(player);
 }
 
 

@@ -24,10 +24,3 @@ BOOL WINAPI CtrlHandler(DWORD fdwCtrlType)
 
 
 
-
-// Return 1 or 2 for player 1 or player 2
-int select_who_starts_first(void) {
-	return (rand() % 2) + 1;
-}
-
-

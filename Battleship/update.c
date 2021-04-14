@@ -132,7 +132,7 @@ void updatePlayers(struct player_data* shooting_player, struct player_data* targ
 			add_new_hit_to_queue(shooting_player, target_row, target_col + 1, ship_type);
 		}
 
-		if (shooting_player->strategy == 4) {
+		if (shooting_player->strategy == 4 || shooting_player->strategy == 5) {
 
 			int orientation = Unknown_ORIENTATION;
 			int temp[5][2];  int temp_ptr = 0;
