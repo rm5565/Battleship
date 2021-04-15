@@ -21,9 +21,12 @@ The project has a couple of central concepts:
 guess the opponent ship's locations.  Player 1 can decide his own attack strategy and all his
 actions are independent of the defending player's actions during the game.  By placing all the player data into structures,
 it was only one line of additional code to run Player 2's attack on Player 1.   
+```
+{
 		p1_wins = play_a_round(player_1, player_2, game, round);
 		p2_wins = play_a_round(player_2, player_1, game, round);
-    
+}
+```
 2) When considering ways to implement automated strategies, it became clear that having
 a target queue was a common need.  Strategy in a simple game like Battleship ends up 
 being a list of next targets to attack.  You code up the strategy, then when it has 
@@ -60,12 +63,12 @@ coordinates into the target queue, thus replaying areas of interest.  Enabling t
 Oh, yeah, that kinda fell out of the program, as I was having more fun tweaking the strategies.  Needs to be added back in eventually,
 the original code for it is in targetting.c.
 
-Hope this helps some folks just starting out with C.   There's a lot of room for improvements here, usual disclaimers, I was not
-trying to write perfect C code, but at least hopefully clear C code.  Sometimes that means doing things in a less elegant way. Its always
-a tradeoff of compactness vs readability, and for this project I favored readability.
-
 ### Building the Project
 This app is built using Visual Studio Community 2019 and runs in a Windows Terminal command line environment.
 
+### Summary
+Hope this helps some folks just starting out with C.   There's always room for improvements here, usual disclaimers, I was not
+trying to write perfect C code, but at least hopefully clear C code.  Sometimes that means doing things in a less elegant way. It's always
+a tradeoff of compactness vs readability, and for this project I favored readability. 
 
 
