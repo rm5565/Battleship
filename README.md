@@ -11,12 +11,19 @@ tries to guess locations where his opponent has placed his ships by announcing c
 ship or not.   The defending player does not tell what ship was hit until it has sunk.  Ships sink will all the cells containing it 
 have been targetted.  The attacking player keeps track of his attacks on a second matrix.  This allows them to track where they have 
 hits/misses and cells that have not yet been called.
+
 ![Full-screen-animated-run_Trim](https://user-images.githubusercontent.com/15236281/114796337-8edbb600-9d45-11eb-8fcd-f912261dfc7c.gif)
+
 ### This Project
-The project has a couple of central concepts
+The project has a couple of central concepts:
+
 1) The game is actually 2 games in one.  Player 1 is playing his own game trying to
-guess the opponent ship's locations.  Player 1 can decide his own strategy and all his
-actions are independent of the opposing player's actions during the game.
+guess the opponent ship's locations.  Player 1 can decide his own attack strategy and all his
+actions are independent of the defending player's actions during the game.  By placing all the player data into structures,
+it was only one line of additional code to run Player 2's attack on Player 1.   
+		p1_wins = play_a_round(player_1, player_2, game, round);
+		p2_wins = play_a_round(player_2, player_1, game, round);
+    
 2) When considering ways to implement automated strategies, it became clear that having
 a target queue was a common need.  Strategy in a simple game like Battleship ends up 
 being a list of next targets to attack.  You code up the strategy, then when it has 
@@ -31,6 +38,7 @@ defender's positions.  The rightmost matrix then takes the known information and
 wants to attack next.  This mode can run an entire game in about a second, plus or minus depending on your system.
 
 ![Strategy-Mode_Trim](https://user-images.githubusercontent.com/15236281/114796351-93a06a00-9d45-11eb-9a84-fd5dd55d957b.gif)
+
 2) The Strategy Test Mode is a mode where all the fancy output is turned off and we just crank on the strategies until done.  
 When I first implemented it, I seriously thought I had messed up.  It ran about 25,000 trials in about a second!  I added a litle
 more output to verify it was progressing, and yes it was executing this extremely fast.  I attribute this to a) the code is small, 
@@ -41,5 +49,22 @@ very solid win/loss percentages relative to other strategies.
 3) Logging mode.  This is handy with used with the animated mode.  Using the Pause between turns flag, you can watch where a strategy does something
 unexpected and then have a log of the events that got you there.  There is debug code for re-creating the initial board layout and inserting
 coordinates into the target queue, thus replaying areas of interest.  Enabling this is a matter of changing the code and re-running it.
+
+### Command Line Options
+		-t   runs the program in Strategy Test Mode
+		-log outputs information to battleship_data.log
+		-p   pauses at the end of each round
+		-h   prints this list
+
+### How Do I Play the Computer?
+Oh, yeah, that kinda fell out of the program, as I was having more fun tweaking the strategies.  Needs to be added back in eventually,
+the original code for it is in targetting.c.
+
+Hope this helps some folks just starting out with C.   There's a lot of room for improvements here, usual disclaimers, I was not
+trying to write perfect C code, but at least hopefully clear C code.  Sometimes that means doing things in a less elegant way. Its always
+a tradeoff of compactness vs readability, and for this project I favored readability.
+
+
+
 
 
