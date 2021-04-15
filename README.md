@@ -64,7 +64,8 @@ Hope this helps some folks just starting out with C.   There's a lot of room for
 trying to write perfect C code, but at least hopefully clear C code.  Sometimes that means doing things in a less elegant way. Its always
 a tradeoff of compactness vs readability, and for this project I favored readability.
 
-
+### Building the Project
+This app is built using Visual Studio Community 2019 and runs in a Windows Terminal command line environment.
 
 
 
