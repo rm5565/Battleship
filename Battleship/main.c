@@ -16,10 +16,10 @@ boolean animate_display = 1;
 int pause_between_shots_mode = 0;
 int write_to_log_file = 0;
 
-char* player1_name = "Stategy 4";
-int player1_strategy = 4;
-char* player2_name = "Stategy 5";
-int player2_strategy = 5;
+char* player1_name = "Strategy 3";
+int player1_strategy = 3;
+char* player2_name = "Strategy 4";
+int player2_strategy = 4;
 
 // Play a round 
 // return 1 if game over

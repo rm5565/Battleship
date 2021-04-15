@@ -114,7 +114,7 @@ void display_boards(struct player_data* shooting_player, struct player_data* tar
 	char radar[10][10];
 	fill_in_radar(radar, shooting_player, target_player);
 
-	printf("%s%s's board         %s's history       %s's Radar\n", POSITION_CURSOR, target_player->name, shooting_player->name, shooting_player->name);
+	printf("%s%s's board\x1b[27G%s's history\x1b[53G%s's Radar\n", POSITION_CURSOR, target_player->name, shooting_player->name, shooting_player->name);
 	printf("%s  0 1 2 3 4 5 6 7 8 9 %s    %s  0 1 2 3 4 5 6 7 8 9 %s    %s  0 1 2 3 4 5 6 7 8 9 \n", axis_label, BG_black, axis_label, BG_black, axis_label);
 	for (int i = 0; i < 10; i++) {
 		printf("%s%d%s%s ", axis_label, i, BG_sea, FG_sea_unknown);
