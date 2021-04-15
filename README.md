@@ -2,13 +2,13 @@
 
 This code is meant as a beginner instructional sample of C programming.  It started as a simple Battleship human vs. computer game, with the computer simply guessing every move.   This evolved into a slightly smarter approach, and from there another two rounds of improvements to the computer's strategy.
 
-It demonstrates use of arrays, structures, pointers, header file and modules, macros, as well as using terminal escape sequences for color and location.
+It demonstrates use of arrays, queues, structures, pointers, header file and modules, macros, as well as using terminal escape sequences for color and location.
 
 ### What is Battleship
-Battleship is a two player game where each player tries to sink their opponent's ships.  Each player has a private 10x10 matrix on which
+The orginal Battleship is a two player game where each player tries to sink their opponent's ships.  Each player has a private 10x10 matrix on which
 his 5 ships are deployed.  Ships do not move after they are deployed.  The play takes place in rounds.  For every round each player 
 tries to guess locations where his opponent has placed his ships by announcing coordinates.  The other player then tells if it hit a 
-ship or not.   The defending player does not tell what ship was hit until it has sunk.  Ships sink will all the cells containing it 
+ship or not.   The defending player does not tell what ship was hit until it has sunk.  Ships sink when all the cells it occupies 
 have been targetted.  The attacking player keeps track of his attacks on a second matrix.  This allows them to track where they have 
 hits/misses and cells that have not yet been called.
 
