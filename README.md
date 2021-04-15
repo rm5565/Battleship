@@ -1,8 +1,8 @@
-# Battleship
-### Battleship Strategy Simlulator
+# Battleship Strategy Simlulator
 
-This code is meant as an intermediate instructional sample of C programming.  It started as a simple Battleship human vs. computer game, with the computer simply guessing every move.   This evolved into a slightly smarter approach, and from there another two
-rounds of improvements to the computer's strategy.
+This code is meant as a beginner instructional sample of C programming.  It started as a simple Battleship human vs. computer game, with the computer simply guessing every move.   This evolved into a slightly smarter approach, and from there another two rounds of improvements to the computer's strategy.
+
+It demonstrates use of arrays, structures, pointers, header file and modules, macros, as well as using terminal escape sequences for color and location.
 
 ### What is Battleship
 Battleship is a two player game where each player tries to sink their opponent's ships.  Each player has a private 10x10 matrix on which
@@ -11,7 +11,7 @@ tries to guess locations where his opponent has placed his ships by announcing c
 ship or not.   The defending player does not tell what ship was hit until it has sunk.  Ships sink will all the cells containing it 
 have been targetted.  The attacking player keeps track of his attacks on a second matrix.  This allows them to track where they have 
 hits/misses and cells that have not yet been called.
-
+![Full-screen-animated-run_Trim](https://user-images.githubusercontent.com/15236281/114796337-8edbb600-9d45-11eb-8fcd-f912261dfc7c.gif)
 ### This Project
 The project has a couple of central concepts
 1) The game is actually 2 games in one.  Player 1 is playing his own game trying to
@@ -30,8 +30,7 @@ the attacker's strategy is all about figuring out what is in there.  The middle 
 defender's positions.  The rightmost matrix then takes the known information and adds green letters to areas the strategy 
 wants to attack next.  This mode can run an entire game in about a second, plus or minus depending on your system.
 
-![Command Prompt - battleship exe 2021-04-14 13-21-30](https://user-images.githubusercontent.com/15236281/114780393-321fd180-9d2c-11eb-8bec-e4d63c689036.gif)
-
+![Strategy-Mode_Trim](https://user-images.githubusercontent.com/15236281/114796351-93a06a00-9d45-11eb-9a84-fd5dd55d957b.gif)
 2) The Strategy Test Mode is a mode where all the fancy output is turned off and we just crank on the strategies until done.  
 When I first implemented it, I seriously thought I had messed up.  It ran about 25,000 trials in about a second!  I added a litle
 more output to verify it was progressing, and yes it was executing this extremely fast.  I attribute this to a) the code is small, 
@@ -43,4 +42,4 @@ very solid win/loss percentages relative to other strategies.
 unexpected and then have a log of the events that got you there.  There is debug code for re-creating the initial board layout and inserting
 coordinates into the target queue, thus replaying areas of interest.  Enabling this is a matter of changing the code and re-running it.
 
-![StrategyTestMode](https://https://github.com/rm5565/Battleship/assets/StrategyTestMode.gif)
+
